@@ -19,3 +19,6 @@ https://docs.trychroma.com/docs/overview/getting-started
 https://blog.futuresmart.ai/chromadb-an-open-source-vector-embedding-database
 https://docs.trychroma.com/guides/build/chunking
 https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory
+https://stackoverflow.com/questions/5904969/how-to-print-a-dictionarys-key
+https://stackoverflow.com/questions/1024847/how-can-i-add-new-keys-to-a-dictionary
+https://stackoverflow.com/questions/2184955/test-if-a-variable-is-a-list-or-tuple
