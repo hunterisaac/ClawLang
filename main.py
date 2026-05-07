@@ -98,7 +98,8 @@ for key, value in tool_list.items():
 print(tool_prompt)
 system_prompt = system_prompt + tool_prompt 
 message_history = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
-
+MAX_ITERATIONS = 5
+fails = 0
 while True:
   response = completion(
     model="mistral/mistral-tiny",
@@ -116,6 +117,7 @@ while True:
       result = response.response_type #need to extract data from response
       if result.state == "final":
         print(result.final_answer)
+        fails = 0
         break
       if result.state =="tool":
          if result.tool_name in tool_list:
@@ -123,17 +125,38 @@ while True:
               tool_response = tool_list[result.tool_name]['function'](result.tool_args)
               message_history.append({"role":"user", "content": f"Tool({result.tool_name}) Response: {tool_response}"})
               print(f"Tool Called! {result.tool_name}({result.tool_args}) Response: {tool_response}")
-            except:
+              fails = 0
+            except Exception as e:
                message_history.append({"role":"user", "content": f"Args were invalid: {result.tool_args}"})
+               fails += 1
+               if fails == MAX_ITERATIONS:
+                  fails = 0
+                  print(f'Max Fails({MAX_ITERATIONS} reached.)')
+                  break
          else:
             message_history.append({"role":"user", "content": f"No tool with name: {result.tool_name}"})
+            fails += 1
+            if fails == MAX_ITERATIONS:
+                  fails = 0
+                  print(f'Max Fails({MAX_ITERATIONS} reached.)')
+                  break
         
         
     except ValidationError as e:
       e = f"{e}"
       message_history.append({"role": "user", "content": "error:" + e})
+      fails += 1
+      if fails == MAX_ITERATIONS:
+         fails = 0
+         print(f'Max Fails({MAX_ITERATIONS} reached.)')
+         break
   except Exception as e:
      message_history.append({"role": "user", "content": "Invalid JSON"})
+     fails += 1
+     if fails == MAX_ITERATIONS:
+         fails = 0
+         print(f'Max Fails({MAX_ITERATIONS} reached.)')
+         break
 
   
   
