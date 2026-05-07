@@ -23,3 +23,4 @@ https://stackoverflow.com/questions/5904969/how-to-print-a-dictionarys-key
 https://stackoverflow.com/questions/1024847/how-can-i-add-new-keys-to-a-dictionary
 https://stackoverflow.com/questions/2184955/test-if-a-variable-is-a-list-or-tuple
 https://www.freecodecamp.org/news/with-open-in-python-with-statement-syntax-example/
+https://stackoverflow.com/questions/3484019/python-list-to-store-class-instance
