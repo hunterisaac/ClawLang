@@ -2,12 +2,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 import chromadb 
 client = chromadb.PersistentClient()
-collection = client.get_or_create_collection(
-        name="RAG",
-    )
+
 query = "what is the password"
 dir = 'rag_docs'
-def create_docs(collection, dir):
+def create_docs(collection_name, dir):
+    collection = client.get_or_create_collection(
+        name=collection_name,
+    )
     splitter = RecursiveCharacterTextSplitter( #taken from the docs website
         chunk_size=500,
         chunk_overlap=50,
@@ -19,7 +20,7 @@ def create_docs(collection, dir):
     ids = []
     texts = []
     for i in arr:
-        if not i.endswith('.txt'): #only accepts .txt
+        if i.endswith('.txt'): #only accepts .txt
             with open(f"{dir}/{i}", "r") as f:
                 text = f.read()
         chunks = splitter.split_text(text)
@@ -30,7 +31,10 @@ def create_docs(collection, dir):
         print('No ids')
         return
     collection.upsert(ids = ids, documents=texts) 
-def search_docs(query, collection, k_results):
+def search_docs(query, collection_name, k_results):
+    collection = client.get_or_create_collection(
+        name=collection_name,
+    )
     MAX_CHARS = 6000
     final = ""
     results = collection.query(
@@ -46,6 +50,6 @@ def search_docs(query, collection, k_results):
         final = final + chunk
 
     return(final.strip())
-print(search_docs(query, collection, k_results=5))
-#create_docs(collection, dir)
+print(search_docs(query, "RAG", k_results=5))
+#create_docs("RAG", dir)
 

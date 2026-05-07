@@ -4,10 +4,12 @@ from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, ValidationError, Field
 from litellm import completion
 import os
+import chromadb 
 import json 
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 api_key = os.environ.get("API_KEY")
 os.environ["MISTRAL_API_KEY"] = api_key
-
+client = chromadb.PersistentClient()
 #Storing tool calls using decorators
 
 tool_list = {}
@@ -27,6 +29,55 @@ def subtract(numbers):
    for x in numbers:
       total -= numbers[x]
    return total
+@tool
+def create_docs(collection_name, dir):
+    """Tool to create a chromadb RAG. Takes args: collection_name, dir"""
+    collection = client.get_or_create_collection(
+        name=collection_name,
+    )
+    splitter = RecursiveCharacterTextSplitter( #taken from the docs website
+        chunk_size=500,
+        chunk_overlap=50,
+        separators=["\n\n", "\n", ". ", " "]
+    )
+    
+    arr = os.listdir(dir)
+    
+    ids = []
+    texts = []
+    for i in arr:
+        if i.endswith('.txt'): #only accepts .txt
+            with open(f"{dir}/{i}", "r") as f:
+                text = f.read()
+            chunks = splitter.split_text(text)
+            for x in range(len(chunks)):
+                  ids.append(f"{i}_{x}")
+                  texts.append(chunks[x])
+    if not ids:
+        print('No ids')
+        return
+    collection.upsert(ids = ids, documents=texts) 
+@tool
+def search_docs(query, collection_name, k_results):
+    """Tool to search docs(RAG chromadb database), takes arges: query, collection_name, k_results"""
+    collection = client.get_or_create_collection(
+        name=collection_name,
+    )
+    MAX_CHARS = 6000
+    final = ""
+    results = collection.query(
+        query_texts=[query], #semantic match
+        n_results=k_results,
+    )
+    citations = results['ids'][0]
+    text = results['documents'][0]
+    for i in range(len(citations)): #realized i didn't need the crazy loops lol
+        chunk = f"Source: {citations[i]}, Content: {text[i]} \n"
+        if len(final) + len(chunk) > MAX_CHARS:
+            break
+        final = final + chunk
+
+    return(final.strip())
 
 class ToolResponse(BaseModel):
     state: Literal['tool']
@@ -70,19 +121,19 @@ while True:
          if result.tool_name in tool_list:
             try:
               tool_response = tool_list[result.tool_name]['function'](result.tool_args)
-              message_history.append({"role":"system", "content": f"Tool({result.tool_name}) Response: {tool_response}"})
+              message_history.append({"role":"user", "content": f"Tool({result.tool_name}) Response: {tool_response}"})
               print(f"Tool Called! {result.tool_name}({result.tool_args}) Response: {tool_response}")
             except:
-               message_history.append({"role":"system", "content": f"Args were invalid: {result.tool_args}"})
+               message_history.append({"role":"user", "content": f"Args were invalid: {result.tool_args}"})
          else:
-            message_history.append({"role":"system", "content": f"No tool with name: {result.tool_name}"})
+            message_history.append({"role":"user", "content": f"No tool with name: {result.tool_name}"})
         
         
     except ValidationError as e:
       e = f"{e}"
-      message_history.append({"role": "system", "content": e})
+      message_history.append({"role": "user", "content": "error:" + e})
   except Exception as e:
-     message_history.append({"role": "system", "content": "Invalid JSON"})
+     message_history.append({"role": "user", "content": "Invalid JSON"})
 
   
   
