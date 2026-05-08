@@ -29,11 +29,19 @@ def add(**numbers):
 registry.register("add", add)
 def subtract(**numbers):
    """Tool to subtract all # in a dict"""
-   total = numbers[0]
-   for x in numbers[1:]:
-      total -= numbers[x]
+   values = list(numbers)
+   total = values[0]
+   for x in values[1:]:
+       total -= x
    return total
 registry.register("subtract", subtract)
+def multiply(**numbers):
+   """Tool to multiply all # in a dict"""
+   total = 1
+   for x in numbers:
+       total *= x
+   return total
+registry.register("multiply", multiply)
 def create_docs(collection_name, dir):
     """Tool to create a chromadb RAG. Takes args: collection_name, dir"""
     collection = client.get_or_create_collection(
@@ -163,6 +171,3 @@ while True:
          fails = 0
          print(f'Max Fails({MAX_ITERATIONS} reached.)')
          break
-
-  
-  
