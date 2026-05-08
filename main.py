@@ -12,24 +12,31 @@ os.environ["MISTRAL_API_KEY"] = api_key
 client = chromadb.PersistentClient()
 #Storing tool calls using decorators
 
-tool_list = {}
-def tool(func):
-   tool_list[func.__name__] = {'description': func.__doc__, 'function': func} #stores with tool name, desecription, and the callable function.
-@tool
+class ToolRegistry:
+    def __init__(self):
+        self.tools={}
+    def register(self, name, fn):
+        self.tools[name] = {"description": fn.__doc__, "function": fn}
+    def get(self, name):
+        return self.tools[name]
+    def all(self):
+        return self.tools
+registry = ToolRegistry()
+
 def add(numbers):
    """Tool to add all # in a dict"""
    total = 0
    for x in numbers:
       total += numbers[x]
    return total
-@tool
+registry.register("add", add)
 def subtract(numbers):
    """Tool to subtract all # in a dict"""
    total = 0
    for x in numbers:
       total -= numbers[x]
    return total
-@tool
+registry.register("subtract", subtract)
 def create_docs(collection_name, dir):
     """Tool to create a chromadb RAG. Takes args: collection_name, dir"""
     collection = client.get_or_create_collection(
@@ -57,9 +64,9 @@ def create_docs(collection_name, dir):
         print('No ids')
         return
     collection.upsert(ids = ids, documents=texts) 
-@tool
+registry.register("create_docs", create_docs)
 def search_docs(query, collection_name, k_results):
-    """Tool to search docs(RAG chromadb database), takes arges: query, collection_name, k_results"""
+    """Tool to search docs(RAG chromadb database), takes args: query, collection_name, k_results"""
     collection = client.get_or_create_collection(
         name=collection_name,
     )
@@ -78,7 +85,7 @@ def search_docs(query, collection_name, k_results):
         final = final + chunk
 
     return(final.strip())
-
+registry.register("search_docs", search_docs)
 class ToolResponse(BaseModel):
     state: Literal['tool']
     tool_name: str
@@ -91,12 +98,13 @@ class LLMResponse(BaseModel):
 
 
 system_prompt = 'You are a mathematical genius. You can only respond with one of two formats: one for calling tools: {"state": "tool", "tool_name": "tool", "tool_args": {"a": x, "b": y} } or one for stating an answer: {"state": "final", "final_answer": "blah blah blah"} Respond only in JSON'
-user_prompt = 'Add 1+1 using tool'
+user_prompt = 'Search "RAG" collection, find the secret key.'
 tool_prompt = "TOOLS: \n"
-for key, value in tool_list.items():
+for key, value in registry.all().items():
     tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value['description']}" + "\n"
 print(tool_prompt)
 system_prompt = system_prompt + tool_prompt 
+print(system_prompt)
 message_history = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
 MAX_ITERATIONS = 5
 fails = 0
@@ -107,6 +115,7 @@ while True:
   )
   response = response.choices[0].message.content
   message_history.append({"role":"assistant", "content": response})
+  print("llm:",response)
   try:
     amount_chars = len(response) #getting json
     start_index = response.index("{") 
@@ -120,9 +129,9 @@ while True:
         fails = 0
         break
       if result.state =="tool":
-         if result.tool_name in tool_list:
+         if registry.get(result.tool_name):
             try:
-              tool_response = tool_list[result.tool_name]['function'](result.tool_args)
+              tool_response = registry.get(result.tool_name)['function'](**result.tool_args)
               message_history.append({"role":"user", "content": f"Tool({result.tool_name}) Response: {tool_response}"})
               print(f"Tool Called! {result.tool_name}({result.tool_args}) Response: {tool_response}")
               fails = 0
