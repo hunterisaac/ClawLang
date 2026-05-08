@@ -23,17 +23,14 @@ class ToolRegistry:
         return self.tools
 registry = ToolRegistry()
 
-def add(numbers):
+def add(**numbers):
    """Tool to add all # in a dict"""
-   total = 0
-   for x in numbers:
-      total += numbers[x]
-   return total
+   return sum(numbers.values())
 registry.register("add", add)
-def subtract(numbers):
+def subtract(**numbers):
    """Tool to subtract all # in a dict"""
-   total = 0
-   for x in numbers:
+   total = numbers[0]
+   for x in numbers[1:]:
       total -= numbers[x]
    return total
 registry.register("subtract", subtract)
@@ -98,7 +95,7 @@ class LLMResponse(BaseModel):
 
 
 system_prompt = 'You are a mathematical genius. You can only respond with one of two formats: one for calling tools: {"state": "tool", "tool_name": "tool", "tool_args": {"a": x, "b": y} } or one for stating an answer: {"state": "final", "final_answer": "blah blah blah"} Respond only in JSON'
-user_prompt = 'Search "RAG" collection, find the secret key.'
+user_prompt = 'Subract 5 from 10'
 tool_prompt = "TOOLS: \n"
 for key, value in registry.all().items():
     tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value['description']}" + "\n"
