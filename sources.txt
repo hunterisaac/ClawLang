@@ -24,3 +24,8 @@ https://stackoverflow.com/questions/1024847/how-can-i-add-new-keys-to-a-dictiona
 https://stackoverflow.com/questions/2184955/test-if-a-variable-is-a-list-or-tuple
 https://www.freecodecamp.org/news/with-open-in-python-with-statement-syntax-example/
 https://stackoverflow.com/questions/3484019/python-list-to-store-class-instance
+https://medium.com/@mbednarski/creating-a-parser-for-a-programming-language-xdlang-part-3-94997860087e
+https://lark-parser.readthedocs.io/en/latest/json_tutorial.html
+https://stackoverflow.com/questions/70966085/how-does-one-match-eol-newline-with-lark
+https://lark-parser.readthedocs.io/en/latest/grammar.html
+https://stackoverflow.com/questions/2338044/regex-letters-numbers-dashes-and-underscores

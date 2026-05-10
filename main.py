@@ -29,7 +29,7 @@ def add(**numbers):
 registry.register("add", add)
 def subtract(**numbers):
    """Tool to subtract all # in a dict"""
-   values = list(numbers)
+   values = list(numbers.values())
    total = values[0]
    for x in values[1:]:
        total -= x
@@ -38,7 +38,7 @@ registry.register("subtract", subtract)
 def multiply(**numbers):
    """Tool to multiply all # in a dict"""
    total = 1
-   for x in numbers:
+   for x in numbers.values():
        total *= x
    return total
 registry.register("multiply", multiply)
