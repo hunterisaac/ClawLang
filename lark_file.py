@@ -1,23 +1,26 @@
 import logging
 from lark import Lark, logger
+from lark.indenter import Indenter
 grammar = r"""
 start: statement+
 statement: use_stm | knowledge_stm
-use_stm: "use" "provider" PROVIDER "(" "model="string")" NEWLINE
-knowledge_stm: "knowledge" RAGNAME ":" NEWLINE 
+use_stm: "use" "provider" PROVIDER "(" "model="string")" _NL
+knowledge_stm: "knowledge" RAGNAME ":" _NL _INDENT _DEDENT
 
 %import common.ESCAPED_STRING
-%import common.NEWLINE
-%import common.INDENT
+%import common.INT
+%import common.SH_COMMENT
 string : ESCAPED_STRING
 PROVIDER: /[A-Z][a-zA-Z]*/
 RAGNAME: /[A-Za-z][A-Za-z0-9\-\_]*/
+_NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
+%declare _INDENT _DEDENT
 """
 text = '''use provider Mistral(model="mistral/mistral-tiny")
 knowledge secret_docs:
-    source: "./rag_docs"
-    top_k: 3'''
+    '''#source: "./rag_docs"
+    #top_k: 3
 #agent Hacker: 
 #    persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
 #    tools: [add, multiply]
@@ -25,6 +28,13 @@ knowledge secret_docs:
 #flow Main(query):
 #    secret_docs >> Hacker(query) >> answer 
 #    print answer'''
-parser = Lark(grammar)
+class TreeIndenter(Indenter):
+    NL_type = '_NL'
+    OPEN_PAREN_types = []
+    CLOSE_PAREN_types = []
+    INDENT_type = '_INDENT'
+    DEDENT_type = '_DEDENT'
+    tab_len = 8
+parser = Lark(grammar, parser='lalr', postlex=TreeIndenter())
 tree = parser.parse(text)
 print(tree.pretty())
