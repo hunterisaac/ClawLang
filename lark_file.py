@@ -3,16 +3,18 @@ from lark import Lark, logger
 from lark.indenter import Indenter
 grammar = r"""
 start: statement+
-statement: use_stm | knowledge_stm
+statement: use_stm | knowledge_stm | agent_stm
 
 use_stm: "use" "provider" PROVIDER "(" "model="string")" _NL
 
-knowledge_stm: "knowledge" RAGNAME ":" _NL _INDENT args _DEDENT 
-args: (source_args | topk_args)+
+knowledge_stm: "knowledge" IDENTIFIER ":" _NL _INDENT knowledge_args _DEDENT 
+knowledge_args: (source_args | topk_args)+
 source_args: "source:" string _NL?
 topk_args: "top_k:" INT _NL?
 
-
+agent_stm: "agent" IDENTIFIER ":" _NL _INDENT system_p tool_args? _DEDENT
+system_p: "persona:" string _NL?
+tool_args: "tools:" "[" (WORD ("," WORD)*)? "]" _NL?
 
 %import common.ESCAPED_STRING
 %import common.INT
@@ -20,7 +22,7 @@ topk_args: "top_k:" INT _NL?
 %import common.SH_COMMENT
 string : ESCAPED_STRING
 PROVIDER: /[A-Z][a-zA-Z]*/
-RAGNAME: /[A-Za-z][A-Za-z0-9\-\_]*/
+IDENTIFIER: /[A-Za-z][A-Za-z0-9\-\_]*/ #string,number combo
 _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
@@ -29,11 +31,13 @@ text = '''use provider Mistral(model="mistral/mistral-tiny")
 knowledge secret_docs:
     source: "./rag_docs"
     top_k: 3
+agent Hacker: 
+    persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
+    tools: [add, multiply]
 '''
 
-#agent Hacker: 
-#    persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
-#    tools: [add, multiply]
+
+
 #
 #flow Main(query):
 #    secret_docs >> Hacker(query) >> answer 
