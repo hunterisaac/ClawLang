@@ -18,16 +18,16 @@ tool_args: "tools:" "[" (IDENTIFIER ("," IDENTIFIER)*)? "]" _NL?
 
 main_stm: "flow" IDENTIFIER "(" IDENTIFIER ")" ":" _NL _INDENT workflow _DEDENT
 workflow: IDENTIFIER (">>" (FLOW  | IDENTIFIER ) )+ _NL
-print_stm: "print" FLOW _NL
+print_stm: "print" IDENTIFIER _NL
 
 %import common.ESCAPED_STRING
 %import common.INT
-%import common.WORD
 %import common.SH_COMMENT
 string : ESCAPED_STRING
 PROVIDER: /[A-Z][a-zA-Z]*/ #string only
 IDENTIFIER: /[A-Za-z][A-Za-z0-9\-\_]*/ #string,number combo
-FLOW: /[A-Za-z][A-Za-z0-9\-\_\(\)]*/ #string,number combo parenthesis
+
+FLOW: /[A-Za-z][A-Za-z0-9_\-]*\([A-Za-z0-9_, ]*\)/ #match actual functionish stuff
 _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
