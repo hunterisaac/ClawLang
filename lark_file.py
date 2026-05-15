@@ -14,7 +14,7 @@ topk_args: "top_k:" INT _NL?
 
 agent_stm: "agent" IDENTIFIER ":" _NL _INDENT system_p tool_args? _DEDENT
 system_p: "persona:" string _NL?
-tool_args: "tools:" "[" (WORD ("," WORD)*)? "]" _NL?
+tool_args: "tools:" "[" (IDENTIFIER ("," IDENTIFIER)*)? "]" _NL?
 
 main_stm: "flow" IDENTIFIER "(" IDENTIFIER ")" ":" _NL _INDENT workflow _DEDENT
 workflow: IDENTIFIER (">>" (FLOW  | IDENTIFIER ) )+ _NL
