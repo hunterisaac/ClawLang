@@ -30,3 +30,5 @@ https://stackoverflow.com/questions/70966085/how-does-one-match-eol-newline-with
 https://lark-parser.readthedocs.io/en/latest/grammar.html
 https://stackoverflow.com/questions/2338044/regex-letters-numbers-dashes-and-underscores
 https://lark-parser.readthedocs.io/en/stable/examples/indented_tree.html
+https://lark-parser.readthedocs.io/en/latest/examples/advanced/error_handling.html
+https://www.lark-parser.org/Lark.js/UnexpectedInput.html
