@@ -3,7 +3,7 @@ from lark import Lark, logger
 from lark.indenter import Indenter
 grammar = r"""
 start: statement+
-statement: use_stm | knowledge_stm | agent_stm
+statement: use_stm | knowledge_stm | agent_stm | main_stm | workflow | print_stm
 
 use_stm: "use" "provider" PROVIDER "(" "model="string")" _NL
 
@@ -16,13 +16,18 @@ agent_stm: "agent" IDENTIFIER ":" _NL _INDENT system_p tool_args? _DEDENT
 system_p: "persona:" string _NL?
 tool_args: "tools:" "[" (WORD ("," WORD)*)? "]" _NL?
 
+main_stm: "flow" IDENTIFIER "(" IDENTIFIER ")" ":" _NL _INDENT
+workflow: IDENTIFIER (">>" (FLOW  | IDENTIFIER ) )+ _NL + _DEDENT?
+print_stm: "print" FLOW _NL
+
 %import common.ESCAPED_STRING
 %import common.INT
 %import common.WORD
 %import common.SH_COMMENT
 string : ESCAPED_STRING
-PROVIDER: /[A-Z][a-zA-Z]*/
+PROVIDER: /[A-Z][a-zA-Z]*/ #string only
 IDENTIFIER: /[A-Za-z][A-Za-z0-9\-\_]*/ #string,number combo
+FLOW: /[A-Za-z][A-Za-z0-9\-\_\(\)]*/ #string,number combo parenthesis
 _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
@@ -34,14 +39,15 @@ knowledge secret_docs:
 agent Hacker: 
     persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
     tools: [add, multiply]
-'''
+flow Main(query):
+    secret_docs >> Hacker(query) >> answer 
+print answer 
+'''  
 
 
 
-#
-#flow Main(query):
-#    secret_docs >> Hacker(query) >> answer 
-#    print answer'''
+
+
 class TreeIndenter(Indenter):
     NL_type = '_NL'
     OPEN_PAREN_types = []
