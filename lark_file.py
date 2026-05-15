@@ -3,7 +3,7 @@ from lark import Lark, logger
 from lark.indenter import Indenter
 grammar = r"""
 start: statement+
-statement: use_stm | knowledge_stm | agent_stm | main_stm | workflow | print_stm
+statement: use_stm | knowledge_stm | agent_stm | main_stm | print_stm
 
 use_stm: "use" "provider" PROVIDER "(" "model="string")" _NL
 
@@ -16,8 +16,8 @@ agent_stm: "agent" IDENTIFIER ":" _NL _INDENT system_p tool_args? _DEDENT
 system_p: "persona:" string _NL?
 tool_args: "tools:" "[" (WORD ("," WORD)*)? "]" _NL?
 
-main_stm: "flow" IDENTIFIER "(" IDENTIFIER ")" ":" _NL _INDENT
-workflow: IDENTIFIER (">>" (FLOW  | IDENTIFIER ) )+ _NL + _DEDENT?
+main_stm: "flow" IDENTIFIER "(" IDENTIFIER ")" ":" _NL _INDENT workflow _DEDENT
+workflow: IDENTIFIER (">>" (FLOW  | IDENTIFIER ) )+ _NL
 print_stm: "print" FLOW _NL
 
 %import common.ESCAPED_STRING
