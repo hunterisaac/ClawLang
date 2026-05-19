@@ -1,7 +1,9 @@
 import logging
-from lark import Lark, UnexpectedInput
+from lark import Lark, UnexpectedInput, ast_utils, Transformer, v_args
+from lark.tree import Meta
 from lark.indenter import Indenter
-
+import sys
+this_module = sys.modules[__name__]
 grammar = r"""
 start: statement+
 statement: use_stm | knowledge_stm | agent_stm | main_stm | print_stm
@@ -44,10 +46,29 @@ class TreeIndenter(Indenter):
     DEDENT_type = '_DEDENT'
     tab_len = 8
 try:
-    parser = Lark(grammar, parser='lalr', postlex=TreeIndenter())
+    parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
     tree = parser.parse(text)
     print(tree.pretty())
+    data = {}
+    for statement in tree.children:
+        node = statement.children[0]  
+        if node.data == "knowledge_stm":
+            data[node.children[0].value] = "knowledge"
+        if node.data == "agent_stm":
+            data[node.children[0].value] = "agent"
+        if node.data == "use_stm":
+            print('yea')
+        if node.data == "main_stm":
+            print('yea')
+        
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
-
-
+print(data)
+class CompileError(Exception):
+    def __init__(self, line, node_type, message, value):
+        self.line = line
+        self.node_type = node_type
+        self.message = message
+        self.value = value
+    def __str__(self):
+        return f"CompileError at line {self.line} in [{self.node_type}]: {self.message} '{self.value}'"
