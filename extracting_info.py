@@ -58,9 +58,11 @@ try:
         node = statement.children[0]  
         if node.data == "knowledge_stm":
             name = node.children[0]
-            knowledge_args = node.children[1].children
-            source_args = node.children[1].children[0].children[0].children[0]
-            top_k_args = node.children[1].children[1].children[0]
+            for arg in node.children[1].children:
+                if arg.data == "source_args":
+                    source_args = node.children[1].children[0].children[0].children[0]
+                if arg.data == "topk_args":
+                    top_k_args = node.children[1].children[1].children[0]
             print(source_args, top_k_args)
             #print(knowledge_args)
             #print(name)
