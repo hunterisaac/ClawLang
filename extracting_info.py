@@ -35,8 +35,11 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
 """
-with open(r"C:\Users\Hunter\Documents\GitHub\Python-Transpiler\lark_files\north_star.ai") as f:
-    text = f.read()
+text = """knowledge secret_docs:
+    source: "./rag_docs"
+    top_k: 3
+
+"""
 
 class TreeIndenter(Indenter):
     NL_type = '_NL'
@@ -53,21 +56,21 @@ try:
     testing = []
     for statement in tree.children:
         node = statement.children[0]  
-        print(str(node) + "\n")
         if node.data == "knowledge_stm":
-            data[node.children[0].value] = {}
-            print(node.data)
-            for i in range(len(node.data)):
-                if str(type(node.children[i])) == "<class 'lark.tree.Tree'>":
-                    print(node.children[i])
-                    testing.append(node.children[i].value)
-                if str(type(node.children[i])) == "<class 'lark.lexer.Token'>":
-                    testing.append(node.children[i].value)
-        
+            name = node.children[0]
+            knowledge_args = node.children[1].children
+            source_args = node.children[1].children[0].children[0].children[0]
+            top_k_args = node.children[1].children[1].children[0]
+            print(source_args, top_k_args)
+            #print(knowledge_args)
+            #print(name)
+            #print(node.children[1].children[0].children[0].children)
+       # print(value)
+       
         
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
-print(data)
+
 class CompileError(Exception):
     def __init__(self, line, node_type, message, value):
         self.line = line

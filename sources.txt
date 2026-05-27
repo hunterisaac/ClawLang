@@ -32,3 +32,6 @@ https://stackoverflow.com/questions/2338044/regex-letters-numbers-dashes-and-und
 https://lark-parser.readthedocs.io/en/stable/examples/indented_tree.html
 https://lark-parser.readthedocs.io/en/latest/examples/advanced/error_handling.html
 https://www.lark-parser.org/Lark.js/UnexpectedInput.html
+https://www.geeksforgeeks.org/python/__init__-in-python/
+https://stackoverflow.com/questions/76449342/using-context-manager-how-can-i-implement-the-indenter-class-in-such-a-way-that
+https://stackoverflow.com/questions/14113187/how-do-you-set-a-conditional-in-python-based-on-datatypes
