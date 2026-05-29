@@ -35,9 +35,9 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
 """
-text = """knowledge secret_docs:
-    source: "./rag_docs"
-    top_k: 3
+text = """agent Hacker:
+    persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
+    tools: [add, multiply]
 
 """
 
@@ -54,6 +54,7 @@ try:
     print(tree.pretty())
     data = {}
     testing = []
+    
     for statement in tree.children:
         node = statement.children[0]  
         if node.data == "knowledge_stm":
@@ -63,7 +64,22 @@ try:
                     source_args = node.children[1].children[0].children[0].children[0]
                 if arg.data == "topk_args":
                     top_k_args = node.children[1].children[1].children[0]
-            print(source_args, top_k_args)
+        if node.data == "agent_stm":
+            tools_list = []
+            name = node.children[0]
+            for arg in node.children[1:3]:
+                if arg.data == "system_p":
+                    system_prompt = arg.children[0].children[0]
+                if arg.data == "tool_args":
+                    for tool in arg.children:
+                        print(tool)
+                        tools_list.append(str(tool))
+        print(tools_list, system_prompt, name)
+               # if arg.data == "persona":
+               #     persona = node.children[1].children[0].children[0].children[0]
+               # if arg.data == "tool_args":
+               #     tool_args = node.children[1].children[1].children[0]
+              #  print(persona, tool_args)
             #print(knowledge_args)
             #print(name)
             #print(node.children[1].children[0].children[0].children)
