@@ -35,10 +35,7 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
 """
-text = """agent Hacker:
-    persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
-    tools: [add, multiply]
-
+text = """use provider Mistral(model="mistral/mistral-tiny")
 """
 
 class TreeIndenter(Indenter):
@@ -74,7 +71,9 @@ try:
                     for tool in arg.children:
                         print(tool)
                         tools_list.append(str(tool))
-        print(tools_list, system_prompt, name)
+        if node.data == "use_stm":
+            provider = node.children[0]
+            model = node.children[1].children[0]
                # if arg.data == "persona":
                #     persona = node.children[1].children[0].children[0].children[0]
                # if arg.data == "tool_args":
