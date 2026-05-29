@@ -35,7 +35,9 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
 """
-text = """use provider Mistral(model="mistral/mistral-tiny")
+text = """flow Main(query):
+    secret_docs >> Hacker(query) >> answer 
+    print answer
 """
 
 class TreeIndenter(Indenter):
@@ -74,6 +76,16 @@ try:
         if node.data == "use_stm":
             provider = node.children[0]
             model = node.children[1].children[0]
+        if node.data == "main_stm":
+            workflow_items = []
+            func_name = node.children[0]
+            func_params = node.children[1]
+            for arg in node.children[2:]:
+                if arg.data == "workflow":
+                    for item in arg.children:
+                        workflow_items.append(str(item))
+                if arg.data == "print_stm":
+                    printing = arg.children[0]
                # if arg.data == "persona":
                #     persona = node.children[1].children[0].children[0].children[0]
                # if arg.data == "tool_args":
