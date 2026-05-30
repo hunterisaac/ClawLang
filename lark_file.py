@@ -49,25 +49,41 @@ try:
     parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
     tree = parser.parse(text)
     print(tree.pretty())
-    data = {}
-    testing = []
     for statement in tree.children:
         node = statement.children[0]  
-        print(str(node) + "\n")
         if node.data == "knowledge_stm":
-            data[node.children[0].value] = {}
-            print(node.data)
-            for i in range(len(node.data)):
-                if str(type(node.children[i])) == "<class 'lark.tree.Tree'>":
-                    print(node.children[i])
-                    testing.append(node.children[i].value)
-                if str(type(node.children[i])) == "<class 'lark.lexer.Token'>":
-                    testing.append(node.children[i].value)
-        
-        
+            name = node.children[0]
+            print(name)
+            for arg in node.children[1].children:
+                if arg.data == "source_args":
+                    source_args = node.children[1].children[0].children[0].children[0]
+                if arg.data == "topk_args":
+                    top_k_args = node.children[1].children[1].children[0]
+        if node.data == "agent_stm":
+            tools_list = []
+            name = node.children[0]
+            for arg in node.children[1:3]:
+                if arg.data == "system_p":
+                    system_prompt = arg.children[0].children[0]
+                if arg.data == "tool_args":
+                    for tool in arg.children:
+                        tools_list.append(str(tool))
+        if node.data == "use_stm":
+            provider = node.children[0]
+            model = node.children[1].children[0]
+        if node.data == "main_stm":
+            workflow_items = []
+            func_name = node.children[0]
+            func_params = node.children[1]
+            for arg in node.children[2:]:
+                if arg.data == "workflow":
+                    for item in arg.children:
+                        workflow_items.append(str(item))
+                if arg.data == "print_stm":
+                    printing = arg.children[0]
+            print(name, source_args, top_k_args, tools_list, system_prompt, provider, model, func_name, func_params, workflow_items, printing)
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
-print(data)
 class CompileError(Exception):
     def __init__(self, line, node_type, message, value):
         self.line = line
