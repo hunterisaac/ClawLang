@@ -105,7 +105,7 @@ system_prompt = 'You are a mathematical genius. You can only respond with one of
 user_prompt = 'Subract 5 from 10'
 tool_prompt = "TOOLS: \n"
 for key, value in registry.all().items():
-    tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value['description']}" + "\n"
+    tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value["description"]}" + "\n"
 print(tool_prompt)
 system_prompt = system_prompt + tool_prompt 
 print(system_prompt)

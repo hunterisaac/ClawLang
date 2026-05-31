@@ -163,4 +163,17 @@ w.indent()
 w.writes("response_type: Union[ToolResponse, FinalResponse] = Field(discriminator='state')")
 w.dedent()
 # LLM Response Class
+w.writes(f"system_prompt = '{system_prompt}'")
+w.writes("user_prompt = query")
+w.writes('tool_prompt = "TOOLS: \n"')
+w.writes("for key, value in registry.all().items():")
+w.indent()
+w.writes('tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value["description"]}" + "\n"')
+w.dedent()
+w.writes("system_prompt = system_prompt + tool_prompt")
+w.writes('message_history = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]')
+w.writes("MAX_ITERATIONS = 5")
+w.writes("fails = 0")
+# some values
+
 print(w.lines)
