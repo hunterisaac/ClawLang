@@ -3,7 +3,6 @@ import os
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, ValidationError, Field
 from litellm import completion
-import os
 import chromadb 
 import json 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
