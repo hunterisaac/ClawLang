@@ -35,3 +35,4 @@ https://www.lark-parser.org/Lark.js/UnexpectedInput.html
 https://www.geeksforgeeks.org/python/__init__-in-python/
 https://stackoverflow.com/questions/76449342/using-context-manager-how-can-i-implement-the-indenter-class-in-such-a-way-that
 https://stackoverflow.com/questions/14113187/how-do-you-set-a-conditional-in-python-based-on-datatypes
+https://stackoverflow.com/questions/899103/writing-a-list-to-a-file-with-python-with-newlines

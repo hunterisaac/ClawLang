@@ -113,10 +113,7 @@ message_history = [{"role": "system", "content": system_prompt}, {"role": "user"
 MAX_ITERATIONS = 5
 fails = 0
 while True:
-  response = completion(
-    model="mistral/mistral-tiny",
-    messages=message_history
-  )
+  response = completion(model="mistral/mistral-tiny",messages=message_history)
   response = response.choices[0].message.content
   message_history.append({"role":"assistant", "content": response})
   print("llm:",response)
