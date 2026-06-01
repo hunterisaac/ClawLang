@@ -43,14 +43,8 @@ def multiply(**numbers):
 registry.register("multiply", multiply)
 def create_docs(collection_name, dir):
     """Tool to create a chromadb RAG. Takes args: collection_name, dir"""
-    collection = client.get_or_create_collection(
-        name=collection_name,
-    )
-    splitter = RecursiveCharacterTextSplitter( #taken from the docs website
-        chunk_size=500,
-        chunk_overlap=50,
-        separators=["\n\n", "\n", ". ", " "]
-    )
+    collection = client.get_or_create_collection(name=collection_name,)
+    splitter = RecursiveCharacterTextSplitter( chunk_size=500,chunk_overlap=50,separators=["\n\n", "\n", ". ", " "]) #taken from the docs website
     
     arr = os.listdir(dir)
     
@@ -71,15 +65,10 @@ def create_docs(collection_name, dir):
 registry.register("create_docs", create_docs)
 def search_docs(query, collection_name, k_results):
     """Tool to search docs(RAG chromadb database), takes args: query, collection_name, k_results"""
-    collection = client.get_or_create_collection(
-        name=collection_name,
-    )
+    collection = client.get_or_create_collection(name=collection_name,)
     MAX_CHARS = 6000
     final = ""
-    results = collection.query(
-        query_texts=[query], #semantic match
-        n_results=k_results,
-    )
+    results = collection.query(query_texts=[query], n_results=k_results)
     citations = results['ids'][0]
     text = results['documents'][0]
     for i in range(len(citations)): #realized i didn't need the crazy loops lol
@@ -105,7 +94,7 @@ system_prompt = 'You are a mathematical genius. You can only respond with one of
 user_prompt = 'Subract 5 from 10'
 tool_prompt = "TOOLS: \n"
 for key, value in registry.all().items():
-    tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value["description"]}" + "\n"
+    tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value['description']}" + "\n"
 print(tool_prompt)
 system_prompt = system_prompt + tool_prompt 
 print(system_prompt)
@@ -150,7 +139,8 @@ while True:
                   fails = 0
                   print(f'Max Fails({MAX_ITERATIONS} reached.)')
                   break
-        
+    
+                
         
     except ValidationError as e:
       e = f"{e}"
@@ -160,6 +150,8 @@ while True:
          fails = 0
          print(f'Max Fails({MAX_ITERATIONS} reached.)')
          break
+
+      
   except Exception as e:
      message_history.append({"role": "user", "content": "Invalid JSON"})
      fails += 1
