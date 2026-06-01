@@ -161,7 +161,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
             w.writes("")
     # Tool Templates
     if has_knowledge:
-        w.writes("def create_docs(collection_name, dir):")
+        w.writes("def create_docs(collection_name, dir): #NOT AN LLM TOOL")
         w.indent()
         w.writes('"""Creates a chromadb RAG from all .txt files in directory. Takes args: collection_name, dir"""')
         w.writes("collection = client.get_or_create_collection(name=collection_name)")
@@ -192,7 +192,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         w.dedent()
         w.writes("collection.upsert(ids = ids, documents=texts)")
         w.dedent()
-        w.writes('registry.register("create_docs", create_docs)')
         w.writes(f'create_docs("{knowledge_name}", {source_args})')
         w.writes("")
         ###### Create docs
