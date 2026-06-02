@@ -112,9 +112,7 @@ try:
                     printing = arg.children[0]
 
 
-
-
-
+    print(workflow_items)
     w = writer()
     w.writelines("""import os
 from typing import Literal, Union
