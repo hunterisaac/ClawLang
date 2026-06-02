@@ -72,6 +72,9 @@ class TreeIndenter(Indenter):
     DEDENT_type = '_DEDENT'
     tab_len = 8
 try:
+    tools_list = []
+    top_k_args = None
+    source_args = None
     parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
     tree = parser.parse(text)
     print(tree.pretty())
