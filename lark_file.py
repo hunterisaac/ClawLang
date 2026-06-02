@@ -73,6 +73,7 @@ class TreeIndenter(Indenter):
     tab_len = 8
 try:
     tools_list = []
+    workflow_items = []
     top_k_args = None
     source_args = None
     parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
@@ -101,7 +102,6 @@ try:
             provider = node.children[0]
             model = node.children[1].children[0]
         if node.data == "main_stm":
-            workflow_items = []
             func_name = node.children[0]
             func_params = node.children[1]
             for arg in node.children[2:]:
