@@ -123,12 +123,23 @@ try:
             pipeline_agent_param = item.split("(")[1].strip(")")
         else:
             if pipeline_output_var is not None:
-                raise CompileError(0, "workflow", "Cannot have more than one output var in pipeline", item)
+                raise CompileError(0, "workflow", "Cannot have more than one output var in pipeline", str(workflow_items))
             pipeline_output_var = item
         print(item)
+    if pipeline_agent is None: 
+        raise CompileError(0, "workflow", "Needs to have an agent", str(workflow_items))
+    if pipeline_output_var is None: 
+        raise CompileError(0, "workflow", "Needs to have an output variable", str(workflow_items))
     print(pipeline_knowledge, pipeline_agent, pipeline_agent_param, pipeline_output_var)
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
 
 
 #trying to build workflow
+#if knowledge base is first, should i push the query through it then feed it to llm or initiate it as a tool call. the first one right.
+#three comboes
+# knowledge -> llm -> answer
+# llm -> knowledge -> answer
+# llm -> answer(assign variable) -> knowledge (wouldnt do anything ig)
+# knowledge -> answer -> llm throws error
+# answer -> x -> x throws error bc var shouldnt be first right
