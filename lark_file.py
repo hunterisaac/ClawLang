@@ -79,6 +79,7 @@ try:
     parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
     tree = parser.parse(text)
     print(tree.pretty())
+    knowledge_name = None
     for statement in tree.children:
         node = statement.children[0]  
         if node.data == "knowledge_stm":
@@ -110,6 +111,27 @@ try:
                         workflow_items.append(str(item))
                 if arg.data == "print_stm":
                     printing = arg.children[0]
+    #trying to assign pipeline 
+    pipeline_knowledge = None
+    pipeline_agent = None
+    pipeline_agent_param = None
+    pipeline_output_var = None
+    
+    for item in workflow_items:
+        if item == str(knowledge_name).strip():
+            pipeline_knowledge = item
+        elif "(" in item:
+            pipeline_agent = item.split("(")[0]
+            pipeline_agent_param = item.split("(")[1].strip(")")
+        else:
+            if pipeline_output_var is not None:
+                raise CompileError(node.meta.line, "workflow", "Cannot have more than one output var in pipeline", str(workflow_items))
+            pipeline_output_var = item
+        print(item)
+    if pipeline_agent is None: 
+        raise CompileError(node.meta.line, "workflow", "Needs to have an agent", str(workflow_items))
+    if pipeline_output_var is None: 
+        raise CompileError(node.meta.line, "workflow", "Needs to have an output variable", str(workflow_items))
 
 
     print(workflow_items)
@@ -282,7 +304,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.writes('result = response.response_type')
     w.writes('if result.state == "final":')
     w.indent()
-    w.writes('print(result.final_answer)')
+    w.writes(f"{pipeline_output_var} = result.final_answer")
+    w.writes(f'print({pipeline_output_var})')
     w.writes('fails = 0')
     w.writes('break')
     w.dedent()
@@ -353,12 +376,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.writes("")
     w.writes('if __name__ == "__main__":')
     w.indent()
-    clean_source = str(source_args).strip('"')
-    w.writes(f"{func_name}('search for the secret code in {clean_source}') # query goes here")
+    w.writes(f"{func_name}('your query here') # query goes here")
     print(w.lines)
     w.dedent()
+    with open('output.py', 'w') as f:
+        for line in w.lines:
+            f.write(f"{line}\n")
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
-with open('output.py', 'w') as f:
-    for line in w.lines:
-        f.write(f"{line}\n")
