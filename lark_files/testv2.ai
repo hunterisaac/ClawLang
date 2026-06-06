@@ -1,0 +1,8 @@
+use provider OpenAi(model="gpt-5.5")
+
+agent Hacker:
+    persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
+
+flow Main(query):
+    Hacker(query) >> answer 
+    print answer

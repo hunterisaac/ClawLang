@@ -20,7 +20,7 @@ system_p: "persona:" string _NL?
 tool_args: "tools:" "[" (IDENTIFIER ("," IDENTIFIER)*)? "]" _NL?
 
 main_stm: "flow" IDENTIFIER "(" IDENTIFIER ")" ":" _NL _INDENT (workflow | print_stm)+ _DEDENT
-workflow: IDENTIFIER (">>" (FLOW  | IDENTIFIER ) )+ _NL
+workflow: (FLOW | IDENTIFIER) (">>" (FLOW  | IDENTIFIER ) )+ _NL
 print_stm: "print" IDENTIFIER _NL?
 
 %import common.ESCAPED_STRING
@@ -36,7 +36,7 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %declare _INDENT _DEDENT
 """
 has_knowledge = False
-with open(r"C:\Users\Hunter\Documents\GitHub\Python-Transpiler\lark_files\north_star.ai") as f:
+with open(r"C:\Users\Hunter\Documents\GitHub\Python-Transpiler\lark_files\testv2.ai") as f:
     text = f.read()
 class CompileError(Exception):
     def __init__(self, line, node_type, message, value):
