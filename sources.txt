@@ -38,3 +38,5 @@ https://stackoverflow.com/questions/14113187/how-do-you-set-a-conditional-in-pyt
 https://stackoverflow.com/questions/899103/writing-a-list-to-a-file-with-python-with-newlines
 https://stackoverflow.com/questions/15392730/in-python-is-it-possible-to-escape-newline-characters-when-printing-a-string
 https://realpython.com/if-name-main-python/
+https://stackoverflow.com/questions/62012886/resolve-ambiguity-between-strings-and-numbers-in-lark
+https://stackoverflow.com/questions/46647744/checking-to-see-if-a-string-is-an-integer-or-float

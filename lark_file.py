@@ -13,7 +13,7 @@ use_stm: "use" "provider" PROVIDER "(" "model="string")" _NL
 knowledge_stm: "knowledge" IDENTIFIER ":" _NL _INDENT knowledge_args _DEDENT 
 knowledge_args: (source_args | topk_args)+
 source_args: "source:" string _NL?
-topk_args: "top_k:" INT _NL?
+topk_args: "top_k:" ("-"? (INT | FLOAT)) _NL? #takes invalid params to later throw an error so people know what went wrong.
 
 agent_stm: "agent" IDENTIFIER ":" _NL _INDENT system_p tool_args? _DEDENT
 system_p: "persona:" string _NL?
@@ -29,7 +29,7 @@ print_stm: "print" IDENTIFIER _NL?
 string : ESCAPED_STRING
 PROVIDER: /[A-Z][a-zA-Z]*/ #string only
 IDENTIFIER: /[A-Za-z][A-Za-z0-9\-\_]*/ #string,number combo
-
+FLOAT: /((\d+\.\d*|\.\d+)(e[-+]?\d+)?|\d+(e[-+]?\d+))/i
 FLOW: /[A-Za-z][A-Za-z0-9_\-]*\([A-Za-z0-9_, ]*\)/ #match actual functionish stuff
 _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
@@ -85,11 +85,21 @@ try:
         if node.data == "knowledge_stm":
             has_knowledge = True
             knowledge_name = node.children[0]
-            for arg in node.children[1].children:
-                if arg.data == "source_args":
-                    source_args = node.children[1].children[0].children[0].children[0]
-                if arg.data == "topk_args":
-                    top_k_args = node.children[1].children[1].children[0]
+            for arg in range(len(node.children[1].children)):
+                print(arg)
+                if node.children[1].children[arg].data == "source_args":
+                    source_args = node.children[1].children[arg].children[0].children[0]
+                if node.children[1].children[arg].data == "topk_args":
+                    top_k_args = node.children[1].children[arg].children[0]
+            if source_args == None:
+                raise CompileError(node.meta.line, "knowledge args", "Missing source args", str(node.children[1].children)) # check if it has source args
+            top_k_args = top_k_args if top_k_args is not None else 3
+            if top_k_args.isdigit():
+                top_k_args = int(top_k_args)
+            else:
+                raise CompileError(node.meta.line, "knowledge args", "Cannot be a float", str(node.children[1].children))
+            if top_k_args < 1:
+                raise CompileError(node.meta.line, "knowledge args", "top k args cannot be less than 1", str(node.children[1].children))          
         if node.data == "agent_stm":
             tools_list = []
             agent_name = node.children[0]
