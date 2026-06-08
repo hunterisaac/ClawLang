@@ -103,12 +103,13 @@ try:
         if node.data == "agent_stm":
             tools_list = []
             agent_name = node.children[0]
-            for arg in node.children[1:3]:
+            for arg in node.children[1:]:
                 if arg.data == "system_p":
                     system_prompt = arg.children[0].children[0]
                 if arg.data == "tool_args":
                     for tool in arg.children:
                         tools_list.append(str(tool))
+            system_prompt = system_prompt if system_prompt is not None else "You are a helpful AI assistant."
         if node.data == "use_stm":
             provider = node.children[0]
             model = node.children[1].children[0]
