@@ -127,7 +127,6 @@ try:
     pipeline_agent = None
     pipeline_agent_param = None
     pipeline_output_var = None
-    
     for item in workflow_items:
         if item == str(knowledge_name).strip():
             pipeline_knowledge = item
@@ -139,10 +138,23 @@ try:
                 raise CompileError(node.meta.line, "workflow", "Cannot have more than one output var in pipeline", str(workflow_items))
             pipeline_output_var = item
         print(item)
+    if workflow_items[0] == pipeline_output_var:
+        raise CompileError(node.meta.line, "workflow", "Cannot start with an output variable", str(workflow_items))
     if pipeline_agent is None: 
         raise CompileError(node.meta.line, "workflow", "Needs to have an agent", str(workflow_items))
     if pipeline_output_var is None: 
         raise CompileError(node.meta.line, "workflow", "Needs to have an output variable", str(workflow_items))
+    # need to make it only knowledge -> agent and only agent -> output variable, decided to make new loop(cleaner)
+    for item in range(len(workflow_items)):
+        if workflow_items[item] == pipeline_knowledge:
+            if workflow_items[item+1] != f"{pipeline_agent}({pipeline_agent_param})":
+                raise CompileError(node.meta.line, "workflow", "Knowledge can only feed into the agent", str(workflow_items))
+            
+        if workflow_items[item] == f"{pipeline_agent}({pipeline_agent_param})":
+            if workflow_items[item+1] != pipeline_output_var:
+                raise CompileError(node.meta.line, "workflow", "Agent can only feed into an output variable", str(workflow_items))
+    
+
 
 
     print(workflow_items)
