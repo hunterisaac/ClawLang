@@ -77,6 +77,7 @@ try:
     workflow_items = []
     top_k_args = None
     source_args = None
+    printing = None
     parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
     tree = parser.parse(text)
     print(tree.pretty())
@@ -155,6 +156,7 @@ try:
             if workflow_items[item+1] != pipeline_output_var:
                 raise CompileError(node.meta.line, "workflow", "Agent can only feed into an output variable", str(workflow_items))
     # knowledge -> agent -> output var 
+    # - if knowledge first, initialize and generate. ig yeah that should work ... hmm
     # agent -> output var
 
 
@@ -334,7 +336,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.writes('if result.state == "final":')
     w.indent()
     w.writes(f"{pipeline_output_var} = result.final_answer")
-    w.writes(f'print({printing})')
+    if printing:
+        w.writes(f'print({printing})')
     w.writes('fails = 0')
     w.writes('break')
     w.dedent()
