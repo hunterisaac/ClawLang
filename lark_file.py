@@ -35,6 +35,7 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
 """
+already_defined = ['ToolRegistry', '__init__', 'create_docs', 'search_docs', 'ToolResponse', 'FinalResponse', 'LLMResponse']
 has_knowledge = False
 with open(r"C:\Users\Hunter\Documents\GitHub\Python-Transpiler\lark_files\testv2.ai") as f:
     text = f.read()
@@ -153,7 +154,8 @@ try:
         if workflow_items[item] == f"{pipeline_agent}({pipeline_agent_param})":
             if workflow_items[item+1] != pipeline_output_var:
                 raise CompileError(node.meta.line, "workflow", "Agent can only feed into an output variable", str(workflow_items))
-    
+    # knowledge -> agent -> output var 
+    # agent -> output var
 
 
 
@@ -212,6 +214,10 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
             w.dedent()
             w.writes(f'registry.register("{tool}", {tool})')
             w.writes("")
+            if tool not in already_defined:
+                already_defined.append(tool)
+            else:
+                raise CompileError(node.meta.line, "tools", "conflicting tool name; already defined", already_defined)
     # Tool Templates
     if has_knowledge:
         w.writes("def create_docs(collection_name, dir): #NOT AN LLM TOOL")
@@ -328,7 +334,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.writes('if result.state == "final":')
     w.indent()
     w.writes(f"{pipeline_output_var} = result.final_answer")
-    w.writes(f'print({pipeline_output_var})')
+    w.writes(f'print({printing})')
     w.writes('fails = 0')
     w.writes('break')
     w.dedent()
@@ -407,3 +413,4 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
             f.write(f"{line}\n")
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
+print(already_defined)
