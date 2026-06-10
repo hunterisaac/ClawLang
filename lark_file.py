@@ -75,6 +75,8 @@ class TreeIndenter(Indenter):
 try:
     tools_list = []
     workflow_items = []
+    agents = []
+    knowledges = []
     top_k_args = None
     source_args = None
     printing = None
@@ -84,6 +86,7 @@ try:
     knowledge_name = None
     for statement in tree.children:
         node = statement.children[0]  
+
         if node.data == "knowledge_stm":
             has_knowledge = True
             knowledge_name = node.children[0]
@@ -101,7 +104,9 @@ try:
             else:
                 raise CompileError(node.meta.line, "knowledge args", "Cannot be a float", str(node.children[1].children))
             if top_k_args < 1:
-                raise CompileError(node.meta.line, "knowledge args", "top k args cannot be less than 1", str(node.children[1].children))          
+                raise CompileError(node.meta.line, "knowledge args", "top k args cannot be less than 1", str(node.children[1].children))     
+            knowledges.append(str(knowledge_name.strip()))
+                 
         if node.data == "agent_stm":
             tools_list = []
             agent_name = node.children[0]
@@ -112,9 +117,12 @@ try:
                     for tool in arg.children:
                         tools_list.append(str(tool))
             system_prompt = system_prompt if system_prompt is not None else "You are a helpful AI assistant."
+            agents.append(str(agent_name.strip()))
+            
         if node.data == "use_stm":
             provider = node.children[0]
             model = node.children[1].children[0]
+
         if node.data == "main_stm":
             func_name = node.children[0]
             func_params = node.children[1]
@@ -132,9 +140,13 @@ try:
     for item in workflow_items:
         if item == str(knowledge_name).strip():
             pipeline_knowledge = item
+            if pipeline_knowledge not in knowledges:
+                raise CompileError(node.meta.line, "knowledge", f"Knowledge(rag database): {pipeline_knowledge} not defined in the knowledge list:", knowledges)
         elif "(" in item:
             pipeline_agent = item.split("(")[0]
             pipeline_agent_param = item.split("(")[1].strip(")")
+            if pipeline_agent not in agents:
+                raise CompileError(node.meta.line, "agent", f"Agent: {pipeline_agent} not defined in the agent list:", agents)
         else:
             if pipeline_output_var is not None:
                 raise CompileError(node.meta.line, "workflow", "Cannot have more than one output var in pipeline", str(workflow_items))
