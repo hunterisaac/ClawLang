@@ -265,7 +265,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         w.dedent()
         w.writes("collection.upsert(ids = ids, documents=texts)")
         w.dedent()
-        w.writes(f'create_docs("{knowledge_name}", {source_args})')
+        w.writes(f'create_docs("{knowledge_name}", {source_args}) #generates RAG automatically on run')
         w.writes("")
         ###### Create docs
         w.writes(f"def search_docs(query, collection_name, k_results={top_k_args}):")
@@ -317,7 +317,10 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     # LLM Response Class
     json_prompt = 'You can only respond with one of two formats: one for calling tools: {"state": "tool", "tool_name": "tool", "tool_args": {"a": x, "b": y} } or one for stating an answer: {"state": "final", "final_answer": "blah blah blah"} Respond only in JSON'
     persona = str(system_prompt).strip('"')
-    w.writes(f"system_prompt = '{persona} {str(json_prompt)}' ")
+    if has_knowledge:
+        w.writes(f"system_prompt = '{persona} {str(json_prompt)} Available RAG databases: {source_args}' ")
+    else:
+        w.writes(f"system_prompt = '{persona} {str(json_prompt)}' ")
     w.writes("user_prompt = query")
     w.writes(r'tool_prompt = "TOOLS: \n"')
     w.writes("for key, value in registry.all().items():")
