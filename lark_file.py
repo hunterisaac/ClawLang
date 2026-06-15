@@ -1,3 +1,7 @@
+#TODO
+#Multiple agents with system prompt for tools too
+#Multiple knowledge banks including feeding multiple into one agent
+#Providers switching
 import logging
 from lark import Lark, UnexpectedInput, ast_utils, Transformer, v_args
 from lark.tree import Meta
@@ -35,7 +39,7 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
 """
-already_defined = ['ToolRegistry', '__init__', 'create_docs', 'search_docs', 'ToolResponse', 'FinalResponse', 'LLMResponse']
+already_defined = ['ToolRegistry', '__init__', 'create_docs', 'search_docs', 'ToolResponse', 'FinalResponse', 'LLMResponse', 'system_prompt']
 has_knowledge = False
 with open(r"C:\Users\Hunter\Documents\GitHub\Python-Transpiler\lark_files\testv2.ai") as f:
     text = f.read()
@@ -75,7 +79,7 @@ class TreeIndenter(Indenter):
 try:
     tools_list = []
     workflow_items = []
-    agents = []
+    agents = {}
     knowledges = []
     top_k_args = None
     source_args = None
@@ -108,7 +112,7 @@ try:
             knowledges.append(str(knowledge_name.strip()))
                  
         if node.data == "agent_stm":
-            tools_list = []
+            temp = []
             agent_name = node.children[0]
             for arg in node.children[1:]:
                 if arg.data == "system_p":
@@ -116,8 +120,11 @@ try:
                 if arg.data == "tool_args":
                     for tool in arg.children:
                         tools_list.append(str(tool))
+                        temp.append(str(tool))
             system_prompt = system_prompt if system_prompt is not None else "You are a helpful AI assistant."
-            agents.append(str(agent_name.strip()))
+            agents[str(agent_name.strip())] = {"system": system_prompt.strip(), "tools":temp}
+
+
             
         if node.data == "use_stm":
             provider = node.children[0]
@@ -135,8 +142,9 @@ try:
     #trying to assign pipeline 
     pipeline_knowledge = None
     pipeline_agent = None
-    pipeline_agent_param = None
-    pipeline_output_var = None
+    pipeline_agents = []
+    pipeline_agent_param = []
+    pipeline_output_var = []
     for item in workflow_items:
         if item == str(knowledge_name).strip():
             pipeline_knowledge = item
@@ -144,15 +152,15 @@ try:
                 raise CompileError(node.meta.line, "knowledge", f"Knowledge(rag database): {pipeline_knowledge} not defined in the knowledge list:", knowledges)
         elif "(" in item:
             pipeline_agent = item.split("(")[0]
-            pipeline_agent_param = item.split("(")[1].strip(")")
+            pipeline_agents.append(pipeline_agent)
+            param = item.split("(")[1].strip(")")
+            pipeline_agent_param.append(param)
             if pipeline_agent not in agents:
                 raise CompileError(node.meta.line, "agent", f"Agent: {pipeline_agent} not defined in the agent list:", agents)
         else:
-            if pipeline_output_var is not None:
-                raise CompileError(node.meta.line, "workflow", "Cannot have more than one output var in pipeline", str(workflow_items))
-            pipeline_output_var = item
+            pipeline_output_var.append(item)
         print(item)
-    if workflow_items[0] == pipeline_output_var:
+    if workflow_items[0] in pipeline_output_var:
         raise CompileError(node.meta.line, "workflow", "Cannot start with an output variable", str(workflow_items))
     if pipeline_agent is None: 
         raise CompileError(node.meta.line, "workflow", "Needs to have an agent", str(workflow_items))
@@ -160,18 +168,23 @@ try:
         raise CompileError(node.meta.line, "workflow", "Needs to have an output variable", str(workflow_items))
     # need to make it only knowledge -> agent and only agent -> output variable, decided to make new loop(cleaner)
     for item in range(len(workflow_items)):
-        if workflow_items[item] == pipeline_knowledge:
-            if workflow_items[item+1] != f"{pipeline_agent}({pipeline_agent_param})":
+        try:
+            temp_agent_test = workflow_items[item+1].split("(")[0]
+            temp_param_test = workflow_items[item+1].split("(")[1].strip(")")
+        except:
+            pass
+        if workflow_items[item] == pipeline_knowledge:      
+            if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param: #making sure the knowledge is feeding into agent
+                pass
+            else:
                 raise CompileError(node.meta.line, "workflow", "Knowledge can only feed into the agent", str(workflow_items))
             
-        if workflow_items[item] == f"{pipeline_agent}({pipeline_agent_param})":
+        if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param: #detects if agent exists and if it feeds into
             if workflow_items[item+1] != pipeline_output_var:
-                raise CompileError(node.meta.line, "workflow", "Agent can only feed into an output variable", str(workflow_items))
-    # knowledge -> agent -> output var 
-    # - if knowledge first, initialize and generate. ig yeah that should work ... hmm
-    # agent -> output var
-
-
+                if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param:
+                    pass
+                else:
+                    raise CompileError(node.meta.line, "workflow", "Agent can only feed into an output variable or another agent", str(workflow_items))
 
     print(workflow_items)
     w = writer()
@@ -311,24 +324,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.dedent()
     w.writes("")
     #
-    w.writes(f"def {func_name}({func_params}):")
+    w.writes(f"def {func_name}({func_params},system_prompt):")
     w.indent()
     w.writes("")
     # LLM Response Class
-    json_prompt = 'You can only respond with one of two formats: one for calling tools: {"state": "tool", "tool_name": "tool", "tool_args": {"a": x, "b": y} } or one for stating an answer: {"state": "final", "final_answer": "blah blah blah"} Respond only in JSON'
-    persona = str(system_prompt).strip('"')
-    if has_knowledge:
-        w.writes(f"system_prompt = '{persona} {str(json_prompt)} Available RAG databases: {source_args}' ")
-    else:
-        w.writes(f"system_prompt = '{persona} {str(json_prompt)}' ")
-    w.writes("user_prompt = query")
-    w.writes(r'tool_prompt = "TOOLS: \n"')
-    w.writes("for key, value in registry.all().items():")
-    w.indent()
-    w.writes('tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value[\'description\']}" + "\\n"')
-    w.dedent()
-    w.writes("system_prompt = system_prompt + tool_prompt")
-    w.writes('message_history = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]')
+    w.writes('message_history = [{"role": "system", "content": system_prompt}, {"role": "user", "content": query}]')
     w.writes("MAX_ITERATIONS = 5")
     w.writes("fails = 0")
     w.writes("")
@@ -350,9 +350,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.writes('result = response.response_type')
     w.writes('if result.state == "final":')
     w.indent()
-    w.writes(f"{pipeline_output_var} = result.final_answer")
-    if printing:
-        w.writes(f'print({printing})')
+    w.writes("return(result.final_answer)")
     w.writes('fails = 0')
     w.writes('break')
     w.dedent()
@@ -423,7 +421,27 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.writes("")
     w.writes('if __name__ == "__main__":')
     w.indent()
-    w.writes(f"{func_name}('your query here') # query goes here")
+    json_prompt = 'You can only respond with one of two formats: one for calling tools: {"state": "tool", "tool_name": "tool", "tool_args": {"a": x, "b": y} } or one for stating an answer: {"state": "final", "final_answer": "blah blah blah"} Respond only in JSON '
+    for pos, agent in enumerate(pipeline_agents):
+        chunk = agents[agent]
+        persona = str(chunk['system']).strip('"')
+      #  if has_knowledge:
+     #       w.writes(f"system_prompt = '{persona} {str(json_prompt)} Available RAG databases: {source_args}' ") - add knowledge databases later
+      #  else:
+        w.writes(f"system_prompt = '{persona} {str(json_prompt)}' ")
+        w.writes(r'tool_prompt = "TOOLS: \n"')
+        w.writes("for key, value in registry.all().items():")
+        w.indent()
+        w.writes(f'existing = {chunk["tools"]}')
+        w.writes(f'if key in existing:')
+        w.indent()
+        w.writes('tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value[\'description\']}" + "\\n"')
+        w.dedent()
+        w.dedent()
+        w.writes("system_prompt = system_prompt + tool_prompt")
+        w.writes(f"{pipeline_output_var} = {func_name}('your query here',system_prompt) # query goes here")
+        if printing:
+            w.writes(f'print({printing})')
     print(w.lines)
     w.dedent()
     with open('output.py', 'w') as f:
@@ -431,4 +449,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
             f.write(f"{line}\n")
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
-print(already_defined)
+for agent in agents:
+    
+    print(chunk["tools"])
+    print(chunk["tools"])
