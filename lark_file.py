@@ -164,10 +164,12 @@ try:
         raise CompileError(node.meta.line, "workflow", "Cannot start with an output variable", str(workflow_items))
     if pipeline_agent is None: 
         raise CompileError(node.meta.line, "workflow", "Needs to have an agent", str(workflow_items))
-    if pipeline_output_var is None: 
+    if not pipeline_output_var: 
         raise CompileError(node.meta.line, "workflow", "Needs to have an output variable", str(workflow_items))
     # need to make it only knowledge -> agent and only agent -> output variable, decided to make new loop(cleaner)
     for item in range(len(workflow_items)):
+        temp_agent_test = ""
+        temp_param_test = "" #resest every loop
         try:
             temp_agent_test = workflow_items[item+1].split("(")[0]
             temp_param_test = workflow_items[item+1].split("(")[1].strip(")")
@@ -180,7 +182,7 @@ try:
                 raise CompileError(node.meta.line, "workflow", "Knowledge can only feed into the agent", str(workflow_items))
             
         if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param: #detects if agent exists and if it feeds into
-            if workflow_items[item+1] != pipeline_output_var:
+            if workflow_items[item+2] not in pipeline_output_var: #needs +2 because its already +1 above
                 if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param:
                     pass
                 else:
@@ -439,7 +441,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         w.dedent()
         w.dedent()
         w.writes("system_prompt = system_prompt + tool_prompt")
-        w.writes(f"{pipeline_output_var} = {func_name}('your query here',system_prompt) # query goes here")
+        w.writes(f"{pipeline_output_var[pos]} = {func_name}('your query here',system_prompt) # query goes here")
         if printing:
             w.writes(f'print({printing})')
     print(w.lines)
@@ -449,7 +451,3 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
             f.write(f"{line}\n")
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
-for agent in agents:
-    
-    print(chunk["tools"])
-    print(chunk["tools"])
