@@ -170,23 +170,34 @@ try:
     for item in range(len(workflow_items)):
         temp_agent_test = ""
         temp_param_test = "" #resest every loop
+        real_agent = False
         try:
             temp_agent_test = workflow_items[item+1].split("(")[0]
             temp_param_test = workflow_items[item+1].split("(")[1].strip(")")
+            if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param:
+                real_agent = True
         except:
             pass
         if workflow_items[item] == pipeline_knowledge:      
-            if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param: #making sure the knowledge is feeding into agent
+            if real_agent: #making sure the knowledge is feeding into agent
                 pass
             else:
                 raise CompileError(node.meta.line, "workflow", "Knowledge can only feed into the agent", str(workflow_items))
             
-        if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param: #detects if agent exists and if it feeds into
-            if workflow_items[item+2] not in pipeline_output_var: #needs +2 because its already +1 above
+        if real_agent: #detects if agent exists and if it feeds into
+            if item+2 > len(workflow_items):
+                raise CompileError(node.meta.line, "workflow", "Workflow cannot end on an agent", str(workflow_items))
+            nexttwo = workflow_items[item+2]
+            try:
+                temp_agent_test = nexttwo.split("(")[0]
+                temp_param_test = nexttwo.split("(")[1].strip(")")
                 if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param:
                     pass
                 else:
-                    raise CompileError(node.meta.line, "workflow", "Agent can only feed into an output variable or another agent", str(workflow_items))
+                    raise CompileError(node.meta.line, "workflow", "Agent cannot feed into undefined agent", str(temp_agent_test))
+            except:
+                if nexttwo not in pipeline_output_var : #needs +2 because its already +1 above
+                    raise CompileError(node.meta.line, "workflow", "Agent can only feed into an output variable or agent", str(workflow_items))
 
     print(workflow_items)
     w = writer()
