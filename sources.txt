@@ -42,3 +42,4 @@ https://stackoverflow.com/questions/62012886/resolve-ambiguity-between-strings-a
 https://stackoverflow.com/questions/46647744/checking-to-see-if-a-string-is-an-integer-or-float
 https://stackoverflow.com/questions/522563/how-can-i-access-the-index-value-in-a-for-loop
 https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty
+https://www.geeksforgeeks.org/python/python-avoiding-quotes-while-printing-strings/

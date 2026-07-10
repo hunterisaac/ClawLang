@@ -185,7 +185,7 @@ try:
                 raise CompileError(node.meta.line, "workflow", "Knowledge can only feed into the agent", str(workflow_items))
             
         if real_agent: #detects if agent exists and if it feeds into
-            if item+2 > len(workflow_items):
+            if item+2 >= len(workflow_items):
                 raise CompileError(node.meta.line, "workflow", "Workflow cannot end on an agent", str(workflow_items))
             nexttwo = workflow_items[item+2]
             try:
@@ -341,7 +341,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.indent()
     w.writes("")
     # LLM Response Class
-    w.writes('message_history = [{"role": "system", "content": system_prompt}, {"role": "user", "content": query}]')
+    w.writes('message_history = [{"role": "system", "content": system_prompt}, {"role": "user", "content": ' + str(func_params) + '}]')
     w.writes("MAX_ITERATIONS = 5")
     w.writes("fails = 0")
     w.writes("")
@@ -462,3 +462,5 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
             f.write(f"{line}\n")
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
+except CompileError as e:
+    print("Compile Error:", e)
