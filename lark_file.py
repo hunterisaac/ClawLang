@@ -7,6 +7,12 @@ from lark import Lark, UnexpectedInput, ast_utils, Transformer, v_args
 from lark.tree import Meta
 from lark.indenter import Indenter
 import sys
+import os
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--filename", default="north_star.ai")
+args = parser.parse_args()
+print(args.filename)
 this_module = sys.modules[__name__]
 grammar = r"""
 start: statement+
@@ -41,8 +47,6 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 """
 already_defined = ['ToolRegistry', '__init__', 'create_docs', 'search_docs', 'ToolResponse', 'FinalResponse', 'LLMResponse', 'system_prompt']
 has_knowledge = False
-with open(r"C:\Users\Hunter\Documents\GitHub\Python-Transpiler\lark_files\testv2.ai") as f:
-    text = f.read()
 class CompileError(Exception):
     def __init__(self, line, node_type, message, value):
         self.line = line
@@ -77,6 +81,9 @@ class TreeIndenter(Indenter):
     DEDENT_type = '_DEDENT'
     tab_len = 8
 try:
+    data_file_path = os.path.join(os.path.dirname(__file__), args.filename)
+    with open(data_file_path) as f:
+        text = f.read()
     tools_list = []
     workflow_items = []
     agents = {}
@@ -245,6 +252,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     w.writes("")
     # Tool registry class
     if tools_list:
+        tools_list = list(dict.fromkeys(tools_list)) #remove dupes, planning on per-agent tools later
         for tool in tools_list:
             w.writes(f"def {tool}(**args):")
             w.indent()

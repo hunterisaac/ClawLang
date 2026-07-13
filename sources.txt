@@ -43,3 +43,5 @@ https://stackoverflow.com/questions/46647744/checking-to-see-if-a-string-is-an-i
 https://stackoverflow.com/questions/522563/how-can-i-access-the-index-value-in-a-for-loop
 https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty
 https://www.geeksforgeeks.org/python/python-avoiding-quotes-while-printing-strings/
+https://www.geeksforgeeks.org/python/python-ways-to-remove-duplicates-from-list/
+https://mimo.org/glossary/python/argparse
