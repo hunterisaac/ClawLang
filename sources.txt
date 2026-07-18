@@ -45,3 +45,4 @@ https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty
 https://www.geeksforgeeks.org/python/python-avoiding-quotes-while-printing-strings/
 https://www.geeksforgeeks.org/python/python-ways-to-remove-duplicates-from-list/
 https://mimo.org/glossary/python/argparse
+https://www.geeksforgeeks.org/python/python-repr-function/

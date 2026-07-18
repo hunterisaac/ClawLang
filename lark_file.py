@@ -299,7 +299,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         w.dedent()
         w.writes("collection.upsert(ids = ids, documents=texts)")
         w.dedent()
-        w.writes(f'create_docs("{knowledge_name}", {source_args}) #generates RAG automatically on run')
+        source_args_san = repr(source_args)
+        w.writes(f'create_docs("{knowledge_name}", {source_args_san}) #generates RAG automatically on run')
         w.writes("")
         ###### Create docs
         w.writes(f"def search_docs(query, collection_name, k_results={top_k_args}):")
@@ -356,7 +357,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     # some values
     w.writes("while True:")
     w.indent()
-    w.writes(f'response = completion(model={model},messages=message_history)')
+    model_san = repr(model)
+    w.writes(f'response = completion(model={model_san},messages=message_history)')
     w.writes('response = response.choices[0].message.content')
     w.writes('message_history.append({"role":"assistant", "content": response})')
     w.writes('try:')
@@ -449,7 +451,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
       #  if has_knowledge:
      #       w.writes(f"system_prompt = '{persona} {str(json_prompt)} Available RAG databases: {source_args}' ") - add knowledge databases later
       #  else:
-        w.writes(f"system_prompt = '{persona} {str(json_prompt)}' ")
+        sanitize_system = repr(f'{persona} {str(json_prompt)}') #sanitized
+        w.writes(f"system_prompt = {sanitize_system}")
         w.writes(r'tool_prompt = "TOOLS: \n"')
         w.writes("for key, value in registry.all().items():")
         w.indent()
@@ -468,6 +471,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     with open('output.py', 'w') as f:
         for line in w.lines:
             f.write(f"{line}\n")
+    print(workflow_items)
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
 except CompileError as e:
