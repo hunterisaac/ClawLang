@@ -109,7 +109,7 @@ try:
                     top_k_args = node.children[1].children[arg].children[0]
             if source_args == None:
                 raise CompileError(node.meta.line, "knowledge args", "Missing source args", str(node.children[1].children)) # check if it has source args
-            top_k_args = top_k_args if top_k_args is not None else 3
+            top_k_args = top_k_args if top_k_args is not None else "3"
             if top_k_args.isdigit():
                 top_k_args = int(top_k_args)
             else:
@@ -143,7 +143,7 @@ try:
             for arg in node.children[2:]:
                 if arg.data == "workflow":
                     for item in arg.children:
-                        workflow_items.append(str(item))
+                        workflow_items.append(item)
                 if arg.data == "print_stm":
                     printing = arg.children[0]
     #trying to assign pipeline 
@@ -156,23 +156,23 @@ try:
         if item == str(knowledge_name).strip():
             pipeline_knowledge = item
             if pipeline_knowledge not in knowledges:
-                raise CompileError(node.meta.line, "knowledge", f"Knowledge(rag database): {pipeline_knowledge} not defined in the knowledge list:", knowledges)
+                raise CompileError(item.line, "knowledge", f"Knowledge(rag database): {pipeline_knowledge} not defined in the knowledge list:", knowledges)
         elif "(" in item:
             pipeline_agent = item.split("(")[0]
             pipeline_agents.append(pipeline_agent)
             param = item.split("(")[1].strip(")")
             pipeline_agent_param.append(param)
             if pipeline_agent not in agents:
-                raise CompileError(node.meta.line, "agent", f"Agent: {pipeline_agent} not defined in the agent list:", agents)
+                raise CompileError(item.line, "agent", f"Agent: {pipeline_agent} not defined in the agent list:", agents)
         else:
             pipeline_output_var.append(item)
         print(item)
     if workflow_items[0] in pipeline_output_var:
-        raise CompileError(node.meta.line, "workflow", "Cannot start with an output variable", str(workflow_items))
+        raise CompileError(workflow_items[0].line, "workflow", "Cannot start with an output variable", str(workflow_items))
     if pipeline_agent is None: 
-        raise CompileError(node.meta.line, "workflow", "Needs to have an agent", str(workflow_items))
+        raise CompileError(0, "workflow", "Needs to have an agent", str(workflow_items))
     if not pipeline_output_var: 
-        raise CompileError(node.meta.line, "workflow", "Needs to have an output variable", str(workflow_items))
+        raise CompileError(0, "workflow", "Needs to have an output variable", str(workflow_items))
     # need to make it only knowledge -> agent and only agent -> output variable, decided to make new loop(cleaner)
     for item in range(len(workflow_items)):
         temp_agent_test = ""
@@ -189,11 +189,11 @@ try:
             if real_agent: #making sure the knowledge is feeding into agent
                 pass
             else:
-                raise CompileError(node.meta.line, "workflow", "Knowledge can only feed into the agent", str(workflow_items))
+                raise CompileError(workflow_items[item].line, "workflow", "Knowledge can only feed into the agent", str(workflow_items))
             
         if real_agent: #detects if agent exists and if it feeds into
             if item+2 >= len(workflow_items):
-                raise CompileError(node.meta.line, "workflow", "Workflow cannot end on an agent", str(workflow_items))
+                raise CompileError(workflow_items[item+2].line, "workflow", "Workflow cannot end on an agent", str(workflow_items))
             nexttwo = workflow_items[item+2]
             try:
                 temp_agent_test = nexttwo.split("(")[0]
@@ -201,10 +201,10 @@ try:
                 if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param:
                     pass
                 else:
-                    raise CompileError(node.meta.line, "workflow", "Agent cannot feed into undefined agent", str(temp_agent_test))
+                    raise CompileError(workflow_items[item+2].line, "workflow", "Agent cannot feed into undefined agent", str(temp_agent_test))
             except:
                 if nexttwo not in pipeline_output_var : #needs +2 because its already +1 above
-                    raise CompileError(node.meta.line, "workflow", "Agent can only feed into an output variable or agent", str(workflow_items))
+                    raise CompileError(workflow_items[item+2].line, "workflow", "Agent can only feed into an output variable or agent", str(workflow_items))
 
     print(workflow_items)
     w = writer()
@@ -299,7 +299,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         w.dedent()
         w.writes("collection.upsert(ids = ids, documents=texts)")
         w.dedent()
-        source_args_san = repr(source_args)
+        source_args_san = repr(str(source_args).strip('"'))
         w.writes(f'create_docs("{knowledge_name}", {source_args_san}) #generates RAG automatically on run')
         w.writes("")
         ###### Create docs
@@ -357,7 +357,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     # some values
     w.writes("while True:")
     w.indent()
-    model_san = repr(model)
+    model_san = repr(str(model).strip('"'))
     w.writes(f'response = completion(model={model_san},messages=message_history)')
     w.writes('response = response.choices[0].message.content')
     w.writes('message_history.append({"role":"assistant", "content": response})')
