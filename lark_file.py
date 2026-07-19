@@ -45,8 +45,8 @@ _NL: (/\r?\n[\t ]*/ | SH_COMMENT)+
 %ignore " "
 %declare _INDENT _DEDENT
 """
-already_defined = ['ToolRegistry', '__init__', 'create_docs', 'search_docs', 'ToolResponse', 'FinalResponse', 'LLMResponse', 'system_prompt']
-has_knowledge = False
+already_defined = ['ToolRegistry', '__init__', 'create_docs', 'search_docs', 'ToolResponse', 'FinalResponse', 'LLMResponse', 'system_prompt', 'and', 'as', 'assert', 'async', 'await', 'break', 'case', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except', 'False', 'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is', 'lambda', 'match', 'None', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'True', 'try', 'while', 'with', 'yield']
+has_knowledge = False 
 class CompileError(Exception):
     def __init__(self, line, node_type, message, value):
         self.line = line
