@@ -115,8 +115,11 @@ try:
             else:
                 raise CompileError(node.meta.line, "knowledge args", "Cannot be a float", str(node.children[1].children))
             if top_k_args < 1:
-                raise CompileError(node.meta.line, "knowledge args", "top k args cannot be less than 1", str(node.children[1].children))     
-            knowledges.append(str(knowledge_name.strip()))
+                raise CompileError(node.meta.line, "knowledge args", "top k args cannot be less than 1", str(node.children[1].children))    
+            if knowledge_name.strip() not in knowledges:
+                knowledges.append(str(knowledge_name.strip()))
+            else:
+                raise CompileError(node.meta.line, "knowledge args", "Knowledge already defined!", str(knowledge_name.strip()))
                  
         if node.data == "agent_stm":
             temp = []
@@ -129,9 +132,10 @@ try:
                         tools_list.append(str(tool))
                         temp.append(str(tool))
             system_prompt = system_prompt if system_prompt is not None else "You are a helpful AI assistant."
-            agents[str(agent_name.strip())] = {"system": system_prompt.strip(), "tools":temp}
-
-
+            if str(agent_name.strip()) in agents:
+                raise CompileError(node.meta.line, "Agent", "Agent already defined", str(agent_name.strip()))
+            else:
+                agents[str(agent_name.strip())] = {"system": system_prompt.strip(), "tools":temp}
             
         if node.data == "use_stm":
             provider = node.children[0]
