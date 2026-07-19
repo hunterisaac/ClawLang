@@ -120,6 +120,8 @@ try:
                 knowledges.append(str(knowledge_name.strip()))
             else:
                 raise CompileError(node.meta.line, "knowledge args", "Knowledge already defined!", str(knowledge_name.strip()))
+            if knowledge_name.strip() in already_defined:
+                raise CompileError(node.meta.line, "knowledge args", "Knowledge name is prohibited", str(knowledge_name.strip()))
                  
         if node.data == "agent_stm":
             temp = []
@@ -132,6 +134,8 @@ try:
                         tools_list.append(str(tool))
                         temp.append(str(tool))
             system_prompt = system_prompt if system_prompt is not None else "You are a helpful AI assistant."
+            if str(agent_name.strip()) in already_defined:
+                raise CompileError(node.meta.line, "Agent", "Agent name is prohibited", str(agent_name.strip()))
             if str(agent_name.strip()) in agents:
                 raise CompileError(node.meta.line, "Agent", "Agent already defined", str(agent_name.strip()))
             else:
@@ -144,6 +148,10 @@ try:
         if node.data == "main_stm":
             func_name = node.children[0]
             func_params = node.children[1]
+            if func_name in already_defined:
+                raise CompileError(node.meta.line, "Function", "Function name is prohibited", str(func_name.strip()))
+            if func_params in already_defined:
+                raise CompileError(node.meta.line, "Function", "Function param name is prohibited", str(func_params.strip()))
             for arg in node.children[2:]:
                 if arg.data == "workflow":
                     for item in arg.children:
@@ -468,9 +476,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         w.dedent()
         w.writes("system_prompt = system_prompt + tool_prompt")
         w.writes(f"{pipeline_output_var[pos]} = {func_name}('your query here',system_prompt) # query goes here")
-        if printing:
-            for prints in printing:
-                w.writes(f'print({prints})') #prints all of them
+    if printing:
+        for prints in printing:
+            w.writes(f'print({prints})') #prints all of them
     print(w.lines)
     w.dedent()
     with open('output.py', 'w') as f:
