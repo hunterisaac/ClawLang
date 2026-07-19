@@ -90,7 +90,7 @@ try:
     knowledges = []
     top_k_args = None
     source_args = None
-    printing = None
+    printing = []
     parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
     tree = parser.parse(text)
     print(tree.pretty())
@@ -149,7 +149,7 @@ try:
                     for item in arg.children:
                         workflow_items.append(item)
                 if arg.data == "print_stm":
-                    printing = arg.children[0]
+                    printing.append(arg.children[0])
     #trying to assign pipeline 
     pipeline_knowledge = None
     pipeline_agent = None
@@ -469,7 +469,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         w.writes("system_prompt = system_prompt + tool_prompt")
         w.writes(f"{pipeline_output_var[pos]} = {func_name}('your query here',system_prompt) # query goes here")
         if printing:
-            w.writes(f'print({printing})')
+            for prints in printing:
+                w.writes(f'print({prints})') #prints all of them
     print(w.lines)
     w.dedent()
     with open('output.py', 'w') as f:
