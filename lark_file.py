@@ -23,7 +23,7 @@ use_stm: "use" "provider" PROVIDER "(" "model="string")" _NL
 knowledge_stm: "knowledge" IDENTIFIER ":" _NL _INDENT knowledge_args _DEDENT 
 knowledge_args: (source_args | topk_args)+
 source_args: "source:" string _NL?
-topk_args: "top_k:" ("-"? (INT | FLOAT)) _NL? #takes invalid params to later throw an error so people know what went wrong.
+topk_args: "top_k:" (MINUS? (INT | FLOAT)) _NL? #takes invalid params to later throw an error so people know what went wrong.
 
 agent_stm: "agent" IDENTIFIER ":" _NL _INDENT system_p tool_args? _DEDENT
 system_p: "persona:" string _NL?
@@ -37,6 +37,7 @@ print_stm: "print" IDENTIFIER _NL?
 %import common.INT
 %import common.SH_COMMENT
 string : ESCAPED_STRING
+MINUS: /-/
 PROVIDER: /[A-Z][a-zA-Z]*/ #string only
 IDENTIFIER: /[A-Za-z][A-Za-z0-9\-\_]*/ #string,number combo
 FLOAT: /((\d+\.\d*|\.\d+)(e[-+]?\d+)?|\d+(e[-+]?\d+))/i
@@ -106,10 +107,16 @@ try:
                 if node.children[1].children[arg].data == "source_args":
                     source_args = node.children[1].children[arg].children[0].children[0]
                 if node.children[1].children[arg].data == "topk_args":
-                    top_k_args = node.children[1].children[arg].children[0]
+                    top_k_args = node.children[1].children[arg].children
+                    top_k_args = ''.join(top_k_args)
+
             if source_args == None:
                 raise CompileError(node.meta.line, "knowledge args", "Missing source args", str(node.children[1].children)) # check if it has source args
             top_k_args = top_k_args if top_k_args is not None else "3"
+            if knowledge_name.strip() in already_defined:
+                raise CompileError(node.meta.line, "knowledge args", "Knowledge name is prohibited", str(knowledge_name.strip()))
+            if "-" in top_k_args:
+                raise CompileError(node.meta.line, "knowledge args", "Cannot be a negative", top_k_args)
             if top_k_args.isdigit():
                 top_k_args = int(top_k_args)
             else:
@@ -120,8 +127,6 @@ try:
                 knowledges.append(str(knowledge_name.strip()))
             else:
                 raise CompileError(node.meta.line, "knowledge args", "Knowledge already defined!", str(knowledge_name.strip()))
-            if knowledge_name.strip() in already_defined:
-                raise CompileError(node.meta.line, "knowledge args", "Knowledge name is prohibited", str(knowledge_name.strip()))
                  
         if node.data == "agent_stm":
             temp = []

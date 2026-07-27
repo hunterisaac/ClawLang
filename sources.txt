@@ -48,3 +48,5 @@ https://mimo.org/glossary/python/argparse
 https://www.geeksforgeeks.org/python/python-repr-function/
 https://stackoverflow.com/questions/1602934/check-if-a-given-key-already-exists-in-a-dictionary
 https://www.w3schools.com/python/python_ref_keywords.asp
+https://github.com/lark-parser/lark/issues/157
+https://stackoverflow.com/questions/42570478/how-to-combine-every-element-of-a-list-to-the-other-list
