@@ -496,7 +496,10 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         w.dedent()
         w.dedent()
         w.writes("system_prompt = system_prompt + tool_prompt")
-        w.writes(f"{pipeline_output_var[pos]} = {func_name}('your query here',system_prompt) # query goes here")
+        if pipeline_agent_param[pos] == str(func_params):
+            w.writes(f"{pipeline_output_var[pos]} = {func_name}('your query goes here',system_prompt) # query goes here")
+        else:
+            w.writes(f"{pipeline_output_var[pos]} = {func_name}({pipeline_agent_param[pos]},system_prompt) # query goes here")
     if printing:
         for prints in printing:
             w.writes(f'print({prints})') #prints all of them
@@ -506,6 +509,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         for line in w.lines:
             f.write(f"{line}\n")
     print(workflow_items)
+    print(pipeline_agent_param)
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
 except CompileError as e:

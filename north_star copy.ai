@@ -6,11 +6,7 @@ knowledge secret_docs:
 agent Hacker:
     persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
     tools: [add, multiply]
-agent Agenttwo:
-    persona: "You are a second agent. You think out of bounds and in unique ways with the tools given to you."
-    tools: [think, agent]
  
 flow Main(query):
     secret_docs >> Hacker(query) >> answer 
-    Agenttwo(answer) >> answer2
     print answer
