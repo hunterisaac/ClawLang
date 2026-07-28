@@ -92,6 +92,12 @@ try:
     top_k_args = None
     source_args = None
     printing = []
+
+    provider = None
+    model = None
+    func_params = None
+    func_name = None
+
     parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
     tree = parser.parse(text)
     print(tree.pretty())
@@ -163,6 +169,16 @@ try:
                         workflow_items.append(item)
                 if arg.data == "print_stm":
                     printing.append(arg.children[0])
+    if not provider:
+        raise CompileError(0, "Use Statement", "Missing Provider", "")
+    if not model:
+        raise CompileError(0, "Use Statement", "Missing Model", "")
+    if not func_params:
+        raise CompileError(0, "Main Statement", "Missing main statement params", "")
+    if not func_name:
+        raise CompileError(0, "Main Statement", "Missing main statement name(function)", "")
+    if not agents:
+        raise CompileError(0, "Agents", "Needs at least one agent!", str(agents))
     #trying to assign pipeline 
     pipeline_knowledge = None
     pipeline_agent = None
