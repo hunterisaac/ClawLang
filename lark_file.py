@@ -133,6 +133,8 @@ try:
                 knowledges.append(str(knowledge_name.strip()))
             else:
                 raise CompileError(node.meta.line, "knowledge args", "Knowledge already defined!", str(knowledge_name.strip()))
+            if len(knowledges) > 1:
+                raise CompileError(node.meta.line, "knowledges", "Can't have more than one knowledge(coming in v2)", str(knowledges))
                  
         if node.data == "agent_stm":
             temp = []
@@ -179,6 +181,7 @@ try:
         raise CompileError(0, "Main Statement", "Missing main statement name(function)", "")
     if not agents:
         raise CompileError(0, "Agents", "Needs at least one agent!", str(agents))
+    
     #trying to assign pipeline 
     pipeline_knowledge = None
     pipeline_agent = None
