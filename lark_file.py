@@ -505,14 +505,19 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
             w.writes(f"{pipeline_output_var[pos]} = {func_name}({pipeline_agent_param[pos]},system_prompt) # query goes here")
     if printing:
         for prints in printing:
-            w.writes(f'print({prints})') #prints all of them
+            if prints in pipeline_output_var:
+                w.writes(f'print({prints})') #prints all of them
+                print('printed',prints)
+            else:
+                raise CompileError(0,"Print statement", "Cannot print variable that isn't an output variable", str(prints))
     print(w.lines)
     w.dedent()
     with open('output.py', 'w') as f:
         for line in w.lines:
             f.write(f"{line}\n")
-    print(workflow_items)
-    print(agents)
+    print(printing)
+    if 'answer' in pipeline_output_var:
+        print('YESS')
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
 except CompileError as e:
