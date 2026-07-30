@@ -490,7 +490,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         persona = str(chunk['system']).strip('"')
         try:
             sanitize_system = repr(f"{persona} {str(json_prompt)} Available RAG databases: {chunk['knowledge']}") #sanitized
-        except Exception:
+            chunk["tools"].append("search_docs")
+        except KeyError:
             sanitize_system = repr(f'{persona} {str(json_prompt)}') #sanitized
         w.writes(f"system_prompt = {sanitize_system}")
         w.writes(r'tool_prompt = "TOOLS: \n"')
