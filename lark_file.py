@@ -487,17 +487,18 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     json_prompt = 'You can only respond with one of two formats: one for calling tools: {"state": "tool", "tool_name": "tool", "tool_args": {"a": x, "b": y} } or one for stating an answer: {"state": "final", "final_answer": "blah blah blah"} Respond only in JSON '
     for pos, agent in enumerate(pipeline_agents):
         chunk = agents[agent]
+        temp_tools = list(chunk["tools"]) 
         persona = str(chunk['system']).strip('"')
         try:
             sanitize_system = repr(f"{persona} {str(json_prompt)} Available RAG databases: {chunk['knowledge']}") #sanitized
-            chunk["tools"].append("search_docs")
+            temp_tools.append("search_docs")
         except KeyError:
             sanitize_system = repr(f'{persona} {str(json_prompt)}') #sanitized
         w.writes(f"system_prompt = {sanitize_system}")
         w.writes(r'tool_prompt = "TOOLS: \n"')
         w.writes("for key, value in registry.all().items():")
         w.indent()
-        w.writes(f'existing = {chunk["tools"]}')
+        w.writes(f'existing = {temp_tools}')
         w.writes(f'if key in existing:')
         w.indent()
         w.writes('tool_prompt = tool_prompt + f"Name: {key} - " + f"Description: {value[\'description\']}" + "\\n"')
