@@ -221,6 +221,9 @@ try:
             pass
         if workflow_items[item] == pipeline_knowledge:      
             if real_agent: #making sure the knowledge is feeding into agent
+                params = agents[str(temp_agent_test)]
+                params["knowledge"] = str(pipeline_knowledge)
+                agents[str(temp_agent_test)] = params
                 pass
             else:
                 raise CompileError(workflow_items[item].line, "workflow", "Knowledge can only feed into the agent", str(workflow_items))
@@ -485,10 +488,10 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
     for pos, agent in enumerate(pipeline_agents):
         chunk = agents[agent]
         persona = str(chunk['system']).strip('"')
-      #  if has_knowledge:
-     #       w.writes(f"system_prompt = '{persona} {str(json_prompt)} Available RAG databases: {source_args}' ") - add knowledge databases later
-      #  else:
-        sanitize_system = repr(f'{persona} {str(json_prompt)}') #sanitized
+        try:
+            sanitize_system = repr(f"{persona} {str(json_prompt)} Available RAG databases: {chunk['knowledge']}") #sanitized
+        except Exception:
+            sanitize_system = repr(f'{persona} {str(json_prompt)}') #sanitized
         w.writes(f"system_prompt = {sanitize_system}")
         w.writes(r'tool_prompt = "TOOLS: \n"')
         w.writes("for key, value in registry.all().items():")
@@ -511,7 +514,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
             else:
                 raise CompileError(0,"Print statement", "Cannot print variable that isn't an output variable", str(prints))
     w.dedent()
-    print(w.lines)
+    #print(w.lines)
     with open('output.py', 'w') as f:
         for line in w.lines:
             f.write(f"{line}\n")
