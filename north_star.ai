@@ -14,4 +14,3 @@ flow Main(query):
     secret_docs >> Hacker(query) >> answer 
     Agenttwo(answer) >> answer2
     print answer
-    print larp

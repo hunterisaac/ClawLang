@@ -50,3 +50,6 @@ https://stackoverflow.com/questions/1602934/check-if-a-given-key-already-exists-
 https://www.w3schools.com/python/python_ref_keywords.asp
 https://github.com/lark-parser/lark/issues/157
 https://stackoverflow.com/questions/42570478/how-to-combine-every-element-of-a-list-to-the-other-list
+https://stackoverflow.com/questions/11854745/how-to-tell-if-a-string-contains-valid-python-code
+https://docs.python.org/3/library/ast.html
+https://docs.python.org/3/tutorial/errors.html

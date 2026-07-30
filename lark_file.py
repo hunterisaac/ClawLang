@@ -9,6 +9,7 @@ from lark.indenter import Indenter
 import sys
 import os
 import argparse
+import ast
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", default="north_star.ai")
 args = parser.parse_args()
@@ -510,14 +511,17 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
                 print('printed',prints)
             else:
                 raise CompileError(0,"Print statement", "Cannot print variable that isn't an output variable", str(prints))
-    print(w.lines)
     w.dedent()
+    print(w.lines)
     with open('output.py', 'w') as f:
         for line in w.lines:
             f.write(f"{line}\n")
-    print(printing)
-    if 'answer' in pipeline_output_var:
-        print('YESS')
+    with open('output.py', 'r') as f:
+        try:
+            ast.parse(f.read())
+        except SyntaxError as e:
+            line = e.lineno if e.lineno is not None else 0
+            raise CompileError(line, "Compiled Code", "ERROR! Compiled python code isn't valid Python! Please double check output.py",  str(e.msg))
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
 except CompileError as e:
