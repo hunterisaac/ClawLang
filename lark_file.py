@@ -101,16 +101,14 @@ try:
 
     parser = Lark(grammar, parser='lalr', postlex=TreeIndenter(), propagate_positions=True)
     tree = parser.parse(text)
-    print(tree.pretty())
     knowledge_name = None
     for statement in tree.children:
         node = statement.children[0]  
 
-        if node.data == "knowledge_stm":
+        if node.data == "knowledge_stm": #only supports one knowledge right now.
             has_knowledge = True
             knowledge_name = node.children[0]
             for arg in range(len(node.children[1].children)):
-                print(arg)
                 if node.children[1].children[arg].data == "source_args":
                     source_args = node.children[1].children[arg].children[0].children[0]
                 if node.children[1].children[arg].data == "topk_args":
@@ -155,7 +153,7 @@ try:
             else:
                 agents[str(agent_name.strip())] = {"system": system_prompt.strip(), "tools":temp}
             
-        if node.data == "use_stm":
+        if node.data == "use_stm": #only supports one at the time
             provider = node.children[0]
             model = node.children[1].children[0]
 
@@ -183,14 +181,14 @@ try:
     if not agents:
         raise CompileError(0, "Agents", "Needs at least one agent!", str(agents))
     
-    #trying to assign pipeline 
+    #trying to assign pipeline / parsing workflow_items
     pipeline_knowledge = None
     pipeline_agent = None
     pipeline_agents = []
     pipeline_agent_param = []
     pipeline_output_var = []
     for item in workflow_items:
-        if item == str(knowledge_name).strip():
+        if item == str(knowledge_name).strip(): #only one knowledge
             pipeline_knowledge = item
             if pipeline_knowledge not in knowledges:
                 raise CompileError(item.line, "knowledge", f"Knowledge(rag database): {pipeline_knowledge} not defined in the knowledge list:", knowledges)
@@ -203,7 +201,6 @@ try:
                 raise CompileError(item.line, "agent", f"Agent: {pipeline_agent} not defined in the agent list:", agents)
         else:
             pipeline_output_var.append(item)
-        print(item)
     if workflow_items[0] in pipeline_output_var:
         raise CompileError(workflow_items[0].line, "workflow", "Cannot start with an output variable", str(workflow_items))
     if pipeline_agent is None: 
@@ -213,9 +210,9 @@ try:
     # need to make it only knowledge -> agent and only agent -> output variable, decided to make new loop(cleaner)
     for item in range(len(workflow_items)):
         temp_agent_test = ""
-        temp_param_test = "" #resest every loop
+        temp_param_test = "" #resets every loop
         real_agent = False
-        try:
+        try: #checks if the next one is an agent
             temp_agent_test = workflow_items[item+1].split("(")[0]
             temp_param_test = workflow_items[item+1].split("(")[1].strip(")")
             if temp_agent_test in pipeline_agents and temp_param_test in pipeline_agent_param:
@@ -243,7 +240,10 @@ try:
                 if nexttwo not in pipeline_output_var : #needs +2 because its already +1 above
                     raise CompileError(workflow_items[item+2].line, "workflow", "Agent can only feed into an output variable or agent", str(workflow_items))
 
-    print(workflow_items)
+
+# Code Writing
+
+
     w = writer()
     w.writelines("""import os
 from typing import Literal, Union
@@ -508,7 +508,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter""")
         for prints in printing:
             if prints in pipeline_output_var:
                 w.writes(f'print({prints})') #prints all of them
-                print('printed',prints)
             else:
                 raise CompileError(0,"Print statement", "Cannot print variable that isn't an output variable", str(prints))
     w.dedent()
