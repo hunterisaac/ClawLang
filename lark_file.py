@@ -254,13 +254,18 @@ from pydantic import BaseModel, ConfigDict, ValidationError, Field
 from litellm import completion
 import chromadb 
 import json 
-from langchain_text_splitters import RecursiveCharacterTextSplitter""")
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+import sys""")
     w.writes("")
     # Imports
     w.writes('api_key = os.environ.get("API_KEY")')
     w.writes(f'os.environ["{provider.upper()}_API_KEY"] = api_key')
     w.writes('client = chromadb.PersistentClient()')
     w.writes("")
+    w.writes("if api_key == None:")
+    w.indent()
+    w.writes("sys.exit('No API_KEY variable detected. Please set it in a .env file before running. (API_KEY = 123... )')")
+    w.dedent()
     # Initialization
     w.writes("class ToolRegistry:")
     w.indent()
