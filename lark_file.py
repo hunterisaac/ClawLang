@@ -252,10 +252,11 @@ try:
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, ValidationError, Field
 from litellm import completion
-import chromadb 
 import json 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 import sys""")
+    if has_knowledge:
+        w.writelines("""from langchain_text_splitters import RecursiveCharacterTextSplitter
+import chromadb""") #knowledge specific imports
     w.writes("")
     # Imports
     w.writes('api_key = os.environ.get("API_KEY")')
