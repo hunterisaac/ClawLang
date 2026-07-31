@@ -265,7 +265,8 @@ import chromadb""") #knowledge specific imports
     w.writes("sys.exit('No API_KEY variable detected. Please set it in a .env file before running. (API_KEY = 123... )')")
     w.dedent()
     w.writes(f'os.environ["{provider.upper()}_API_KEY"] = api_key')
-    w.writes('client = chromadb.PersistentClient()')
+    if has_knowledge:
+        w.writes('client = chromadb.PersistentClient()')
     w.writes("")
     # Initialization
     w.writes("class ToolRegistry:")
