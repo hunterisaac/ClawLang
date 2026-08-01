@@ -534,6 +534,15 @@ import chromadb""") #knowledge specific imports
         except SyntaxError as e:
             line = e.lineno if e.lineno is not None else 0
             raise CompileError(line, "Compiled Code", "ERROR! Compiled python code isn't valid Python! Please double check output.py",  str(e.msg))
+    r = writer()
+    r.writes('pydantic==2.10.6')
+    r.writes('litellm==1.83.0')
+    if has_knowledge:
+        r.writes('langchain_text_splitters==1.1.1')
+        r.writes('chromadb==1.5.0')
+    with open(os.path.join(os.path.dirname(__file__), 'output', 'requirements.txt'), 'w') as f:
+            for line in r.lines:
+                f.write(f"{line}\n")
 except UnexpectedInput as e:
     print("Error on line:", e.line, e)
 except CompileError as e:
