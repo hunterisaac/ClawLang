@@ -1,3 +1,4 @@
 .env
 chroma/
 __pycache__/
+extra/
