@@ -1,0 +1,16 @@
+use provider Mistral(model="mistral/mistral-tiny")
+
+knowledge secret_docs:
+    source: "./rag_docs"
+    top_k: 3
+agent Hacker:
+    persona: "You are a master hacker. You think out of bounds and in unique ways with the tools given to you."
+    tools: [add, multiply]
+
+agent Student:
+    persona: "You are a teacher. Try to explain every topic in a detailed, intuitive way."
+ 
+flow Main(query):
+    secret_docs >> Hacker(query) >> answer 
+    Student(answer) >> answer2
+    print answer2

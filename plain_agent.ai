@@ -1,0 +1,8 @@
+use provider Mistral(model="mistral/mistral-tiny")
+
+agent Assistant:
+    persona: "You are a friendly and helpful assistant who explains things clearly."
+
+flow Main(query):
+    Assistant(query) >> answer
+    print answer

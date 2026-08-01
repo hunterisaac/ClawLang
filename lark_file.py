@@ -490,13 +490,13 @@ import chromadb""") #knowledge specific imports
     w.writes("")
     w.writes('if __name__ == "__main__":')
     w.indent()
-    json_prompt = 'You can only respond with one of two formats: one for calling tools: {"state": "tool", "tool_name": "tool", "tool_args": {"a": x, "b": y} } or one for stating an answer: {"state": "final", "final_answer": "blah blah blah"} Respond only in JSON '
+    json_prompt = 'You can only respond with one of two formats: one for calling tools: {"state": "tool", "tool_name": "tool", "tool_args": {"a": x, "b": y} } or one for stating an answer: {"state": "final", "final_answer": "blah blah blah"} Respond only in JSON. Do not use backslashes or latex notation. When quoting something, use single quotes instead of double quotes.'
     for pos, agent in enumerate(pipeline_agents):
         chunk = agents[agent]
         temp_tools = list(chunk["tools"]) 
         persona = str(chunk['system']).strip('"')
         try:
-            sanitize_system = repr(f"{persona} {str(json_prompt)} Available RAG databases: {chunk['knowledge']}") #sanitized
+            sanitize_system = repr(f"{persona} {str(json_prompt)} Available RAG databases: {chunk['knowledge']}. ") #sanitized
             temp_tools.append("search_docs")
         except KeyError:
             sanitize_system = repr(f'{persona} {str(json_prompt)}') #sanitized
