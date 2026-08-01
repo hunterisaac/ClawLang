@@ -13,7 +13,6 @@ import ast
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", default="north_star.ai")
 args = parser.parse_args()
-print(args.filename)
 this_module = sys.modules[__name__]
 grammar = r"""
 start: statement+
@@ -524,10 +523,12 @@ import chromadb""") #knowledge specific imports
                 raise CompileError(0,"Print statement", "Cannot print variable that isn't an output variable", str(prints))
     w.dedent()
     #print(w.lines)
-    with open('output.py', 'w') as f:
+    if not os.path.exists(os.path.join(os.path.dirname(__file__), 'output')):
+        os.makedirs(os.path.join(os.path.dirname(__file__), 'output'))
+    with open(os.path.join(os.path.dirname(__file__), 'output', 'output.py'), 'w') as f:
         for line in w.lines:
             f.write(f"{line}\n")
-    with open('output.py', 'r') as f:
+    with open(os.path.join(os.path.dirname(__file__), 'output', 'output.py'), 'r') as f:
         try:
             ast.parse(f.read())
         except SyntaxError as e:
