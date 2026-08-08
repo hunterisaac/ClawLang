@@ -54,3 +54,4 @@ https://stackoverflow.com/questions/11854745/how-to-tell-if-a-string-contains-va
 https://docs.python.org/3/library/ast.html
 https://docs.python.org/3/tutorial/errors.html
 https://stackoverflow.com/questions/32470543/open-file-in-another-directory-python
+https://reneelin2019.medium.com/building-good-coding-habits-install-python-packages-with-requirements-txt-e7fd247bd3df
