@@ -78,7 +78,9 @@ ex:
 >
 
 > knowledge secret_docs:
+>
 > &nbsp;&nbsp;&nbsp;&nbsp;source: "./rag_docs"
+>
 > &nbsp;&nbsp;&nbsp;&nbsp;top_k: 3
 
 Agent statement defines an agent with a system prompt and available tools(generates template)
@@ -92,7 +94,9 @@ Agent statement defines an agent with a system prompt and available tools(genera
 ex:
 
 > - agent Hacker:
+>
 > &nbsp;&nbsp;&nbsp;&nbsp;persona: "You are a master hacker. You think out of bounds and in unique way with the tools given to you."
+>
 > &nbsp;&nbsp;&nbsp;&nbsp;tools: [add, multiply]
 
 The flow statement puts everything together, specifying when agents are run, if they have a RAG database, and where the outputs go.
@@ -110,6 +114,7 @@ flow Main_func_name(Func_param):
 example statements:
 
 > secret_docs >> Hacker(query) >> answer
+>
 > secret_docs >> Student(answer) >> answer2
 
 Additionally, it includes a print function where at the end of the code, it will print the output variables you want.
