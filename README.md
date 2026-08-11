@@ -39,23 +39,23 @@ What the output contains:
 
 ## Installation
 
-git clone https://github.com/hunterisaac/ClawLang.git
-
-cd ClawLang
-
-py -m pip install -r requirements.txt
+    git clone https://github.com/hunterisaac/ClawLang.git
+    
+    cd ClawLang
+    
+    py -m pip install -r requirements.txt
 
 ## CLI Usage
 
 You can run
 
-py -m lark_file --filename north_star.ai
+    py -m lark_file --filename north_star.ai
 
 and the output will be generated in the /output folder with the specific modules you need to pip install:
 
-cd output
-
-py -m pip install -r requirements.txt
+    cd output
+    
+    py -m pip install -r requirements.txt
 
 ## Syntax
 
@@ -69,42 +69,30 @@ Knowledge statement defines a RAG database and arguments
 
 - knowledge Knowledge_name:
 
-&nbsp;&nbsp;&nbsp;&nbsp;source: "./directory" *required
+	&nbsp;&nbsp;&nbsp;&nbsp;source: "./directory" *required
 
-&nbsp;&nbsp;&nbsp;&nbsp;top_k: int *optional, defaults to 3
+	&nbsp;&nbsp;&nbsp;&nbsp;top_k: int *optional, defaults to 3
 
 ex:
 
 >
 
 > knowledge secret_docs:
-
->
-
 > &nbsp;&nbsp;&nbsp;&nbsp;source: "./rag_docs"
-
->
-
 > &nbsp;&nbsp;&nbsp;&nbsp;top_k: 3
 
 Agent statement defines an agent with a system prompt and available tools(generates template)
 
 - agent Agent_name:
 
-&nbsp;&nbsp;&nbsp;&nbsp;persona: "system prompt"
+	&nbsp;&nbsp;&nbsp;&nbsp;persona: "system prompt"
 
-&nbsp;&nbsp;&nbsp;&nbsp;tools: [tool, second_tool]
+	&nbsp;&nbsp;&nbsp;&nbsp;tools: [tool, second_tool]
 
 ex:
 
 > - agent Hacker:
-
->
-
 > &nbsp;&nbsp;&nbsp;&nbsp;persona: "You are a master hacker. You think out of bounds and in unique way with the tools given to you."
-
->
-
 > &nbsp;&nbsp;&nbsp;&nbsp;tools: [add, multiply]
 
 The flow statement puts everything together, specifying when agents are run, if they have a RAG database, and where the outputs go.
@@ -122,9 +110,6 @@ flow Main_func_name(Func_param):
 example statements:
 
 > secret_docs >> Hacker(query) >> answer
-
->
-
 > secret_docs >> Student(answer) >> answer2
 
 Additionally, it includes a print function where at the end of the code, it will print the output variables you want.
